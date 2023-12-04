@@ -235,6 +235,7 @@ public class Juego {
 
             case 3:
                 jugadorActual.setPosicion((jugadorActual.getPosicion() - 3), tablero.getCasillas());
+                tablero.imprimirTablero();
                 accionCasilla();
                 break;
 
@@ -243,6 +244,7 @@ public class Juego {
                 if (jugadorActual.getPosicion() == 7) {
                     jugadorActual.setPosicion(15, tablero.getCasillas());
                     if(!tablero.getCasilla(15).getPropietario().equals(jugadorActual) && !tablero.getCasilla(15).getPropietario().equals(banca) && !tablero.getCasilla(15).getHipotecado()){
+                        tablero.imprimirTablero();
                         pagarAv(jugadorActual,alquilersuerte, tablero.getCasilla(15).getPropietario());
                         tablero.getCasilla(15).setRentabilidad(tablero.getCasilla(15).getRentabilidad() + alquilersuerte);
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
@@ -256,6 +258,7 @@ public class Juego {
                 if (jugadorActual.getPosicion() == 22) {
                     jugadorActual.setPosicion(25, tablero.getCasillas());
                     if(!tablero.getCasilla(25).getPropietario().equals(jugadorActual) && !tablero.getCasilla(25).getPropietario().equals(banca) && !tablero.getCasilla(25).getHipotecado()){
+                        tablero.imprimirTablero();
                         pagarAv(jugadorActual,alquilersuerte, tablero.getCasilla(25).getPropietario());
                         tablero.getCasilla(25).setRentabilidad(tablero.getCasilla(25).getRentabilidad() + alquilersuerte);
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
@@ -269,6 +272,7 @@ public class Juego {
                 }
                 if (jugadorActual.getPosicion() == 36) {
                     jugadorActual.setPosicion(5, tablero.getCasillas());
+                    tablero.imprimirTablero();
                     System.out.println("Has pasado por la casilla de salida, cobras" + pSalida);
                     jugadorActual.addDinero(pSalida);
                     jugadorActual.setPasarPorCasillaDeSalida(jugadorActual.getPasarPorCasillaDeSalida() + pSalida);
