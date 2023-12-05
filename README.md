@@ -4,3 +4,4 @@ He cambiado un poco la estructura del main branch de git, como veis. Básicament
 
 Tareas pendientes: 
   Completar calcularAlquiler() en Solar. Para tener en cuenta todos los edificios no solo las casas.
+  Implementar descripción en la nueva implementación de casillas.
