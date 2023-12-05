@@ -72,4 +72,24 @@ public class Solar extends Propiedad {
         if (grupo!=null) formato = grupo.colorFormato() + formato + "\u001B[0m";
         return String.format(formato,nombre,StringAvatares());
     }
+    //Hacemos override de hipotecar para tener en cuenta los edificios
+
+    /**
+     * Comprueba si el solar tiene edificios, y si no, hipoteca:
+     *  Añadimos dinero al propietario
+     *  Ponemos hipotecado a true.
+      */
+    public void hipotecar(){
+        if (edificios!=null && !edificios.isEmpty()){//Overrideamos esto en solar
+            System.out.println("Debes vender todos los edificios antes de hipotecar.");
+            return;
+        }
+        else if (hipotecado){
+            System.out.println("No puedes hipotecar una propiedad ya hipotecada.");
+            return;
+        }
+        hipotecado = true;
+        propietario.addDinero(precio/2);
+        System.out.println("Has hipotecado "+ this+" por "+precio/2+"$");
+    }
 }

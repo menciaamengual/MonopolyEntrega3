@@ -8,7 +8,7 @@ import Procesos.Tablero;
 public class Edificio {
     int tipo; //0-3
     String identificador;
-    Casilla casilla;
+    Solar casilla;
     int precio;
     Jugador propietario;
 
@@ -41,12 +41,12 @@ public class Edificio {
 
     }
 
-    public void setCasilla(Casilla casilla) {
+    public void setCasilla(Solar casilla) {
         this.casilla = casilla;
         propietario = casilla.getPropietario();
     }
 
-    public Casilla getCasilla() {
+    public Solar getCasilla() {
         return casilla;
     }
 

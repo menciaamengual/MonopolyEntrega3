@@ -62,7 +62,9 @@ public abstract class Casilla{
     public boolean isOcupante(Jugador jugador){
         return (ocupantes.contains(jugador));
     }
-
+    public Boolean isComprable(){ //Suponemos que no se puede comprar una casilla que ya sea de otro jugador
+        return false; //En todos los casos que no este overrideado (hijos comprables), devuelve falso
+    }
 }
 
 //
@@ -373,16 +375,14 @@ public abstract class Casilla{
 //    public int getVisitas() {return visitas;}
 //
 //    //METODOS PUBLICOS
-//
-//    public Boolean isComprable(){ //Suponemos que no se puede comprar una casilla que ya sea de otro jugador
-//        return tipo < 3 && propietario.isBanca();
-//    }
-//    public Boolean pagasAlquiler(Jugador jugador){
+
+
+//    public Boolean pagasAlquiler(Jugador jugador){ //Puede que tenga 0 usos esta funciíon
 //        //return propietario!=jugador && ;
 //        //return !Propietario().equals(jugador)&&!casilla.isComprable() && !casilla.getHipotecado();
 //        return true;
 //    }
-//
+
 //    /**
 //     * Calcula el alquiler que debe ser pagado al caer en una casilla de tipo solar, transporte, servicio o impuesto
 //     * @return int con el valor que el jugador que caiga en esa casilla debe pagar.
