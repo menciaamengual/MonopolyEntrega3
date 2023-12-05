@@ -1,5 +1,8 @@
 package Procesos;
 
+import Procesos.Casillas.Casilla;
+import Procesos.Casillas.Edificio;
+
 import java.util.*;
 
 

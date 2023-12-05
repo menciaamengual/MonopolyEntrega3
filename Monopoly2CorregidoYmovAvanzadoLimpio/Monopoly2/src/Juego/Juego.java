@@ -3,6 +3,9 @@ package Juego;
 import java.util.*;
 
 import Procesos.*;
+import Procesos.Casillas.Casilla;
+import Procesos.Casillas.Edificio;
+import Procesos.Casillas.Grupo;
 
 public class Juego {
     //ATRIBUTOS

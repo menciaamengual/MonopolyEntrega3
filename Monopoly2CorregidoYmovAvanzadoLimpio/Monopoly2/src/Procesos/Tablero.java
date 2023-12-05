@@ -1,10 +1,11 @@
 package Procesos;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import Juego.*;
+
+import Procesos.Casillas.Casilla;
+import Procesos.Casillas.Grupo;
 
 public class Tablero {
     static int ccasa = 0;
