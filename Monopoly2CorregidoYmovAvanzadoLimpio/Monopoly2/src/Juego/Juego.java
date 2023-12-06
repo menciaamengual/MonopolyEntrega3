@@ -3,9 +3,7 @@ package Juego;
 import java.util.*;
 
 import Procesos.*;
-import Procesos.Casillas.Casilla;
-import Procesos.Casillas.Edificio;
-import Procesos.Casillas.Grupo;
+import Procesos.Casillas.*;
 
 public class Juego {
     //ATRIBUTOS
@@ -993,26 +991,30 @@ public class Juego {
                 }
                 caidas = contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas()))==2;
 
-                if (entradaPartida.length > 1) switch (entradaPartida[1]) {
+                if (entradaPartida.length > 1)
+                    if(jugadorActual.getCasilla(tablero.getCasillas()) instanceof Solar)
+                    switch (entradaPartida[1]) {
                     case "casa":
                     case "Casa":
-                        jugadorActual.getCasilla(tablero.getCasillas()).construir(0, jugadorActual,caidas);
+                            ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(0, jugadorActual,caidas);
                         break;
                     case "hotel":
                     case "Hotel":
-                        jugadorActual.getCasilla(tablero.getCasillas()).construir(1, jugadorActual,caidas);
+                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(1, jugadorActual,caidas);
                         break;
                     case "piscina":
                     case "Piscina":
-                        jugadorActual.getCasilla(tablero.getCasillas()).construir(2, jugadorActual,caidas);
+                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(2, jugadorActual,caidas);
                         break;
                     case "pista":
                     case "Pista":
-                        jugadorActual.getCasilla(tablero.getCasillas()).construir(3, jugadorActual,caidas);
+                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(3, jugadorActual,caidas);
                         break;
                     default:
                         System.out.println("No existe este edificio. Prueba con casa, hotel, piscina o pista :)");
                 }
+                else
+                    System.out.println("No estás en un solar >: (");
                 break;
             case "vender":
             case "Vender":
@@ -1023,9 +1025,12 @@ public class Juego {
                 Edificio aux = null;
                 if (entradaPartida.length > 2) {
                     String identificador = entradaPartida [1]+" "+entradaPartida[2];
-                    if (jugadorActual.getPropiedades()!=null) for (Casilla cite: jugadorActual.getPropiedades()) if (cite.getEdificios()!=null) for(Edificio eite: cite.getEdificios()){
-                        if (eite.getIdentificador().equals(identificador)) aux = eite;
-                    }
+                    if (jugadorActual.getPropiedades()!=null) for (Propiedad cite: jugadorActual.getPropiedades()) if (cite instanceof Solar)
+
+                        if (((Solar)cite).getEdificios()!=null) for(Edificio eite: ((Solar)cite).getEdificios()){
+                            if (eite.getIdentificador().equals(identificador)) aux = eite;
+                        }
+
                     if (aux!=null) aux.getCasilla().venderEdificio(aux,jugadorActual);
                     else System.out.println("Identificador inválido...");
                 } else System.out.println("Identificador inválido...");
@@ -1060,8 +1065,9 @@ public class Juego {
     }
 
     private void actualizarPropietarioCasillas() {
-        for (Casilla ite: tablero.getCasillas()){
-            if (ite.getPropietario()==null) ite.setPropietario(banca);
+        for (Casilla ite: tablero.getCasillas()) {
+            if (ite instanceof Propiedad)
+                if (((Propiedad) ite).getPropietario() == null) ((Propiedad) ite).setPropietario(banca);
         }
     }
 
@@ -1126,26 +1132,27 @@ public class Juego {
 
     private void actualizarPrecioCasillas() {
         for (Casilla ite : getTablero().getCasillas())
-            if (ite.getPropietario().isBanca()) {
-                ite.setPrecio((int) (ite.getPrecio() * 1.05));
+            if (ite instanceof Propiedad)
+            if (((Propiedad)ite).getPropietario().isBanca()) {
+                ((Propiedad)ite).setPrecio((int) (((Propiedad)ite).getPrecio() * 1.05));
             }
     }
 
-    private ArrayList<Casilla> casillaMasRentable(ArrayList<Casilla> tablero){
-        int maximo=tablero.get(0).getRentabilidad();
-        for(Casilla ite:tablero){
-            if (ite.getTipo() < 3) {
-                if (ite.getRentabilidad() > maximo)
-                    maximo = ite.getRentabilidad();
+    private ArrayList<Propiedad> casillaMasRentable(){
+        ArrayList<Casilla> casillas = tablero.getCasillas();
+        int maximo=0;
+        for(Casilla ite:casillas){
+            if (ite instanceof Propiedad)
+                if (((Propiedad)ite).getRentabilidad() > maximo)
+                    maximo = ((Propiedad)ite).getRentabilidad();
             }
-        }
-        ArrayList<Casilla> casillasConMaximo = new ArrayList<>();
-        for (Casilla ite : tablero) {
-            if(ite.getTipo() < 3){
-                if (ite.getRentabilidad() == maximo)
-                    casillasConMaximo.add(ite);
+
+        ArrayList<Propiedad> casillasConMaximo = new ArrayList<>();
+        for (Casilla ite : casillas) {
+            if (ite instanceof Propiedad)
+                if (((Propiedad)ite).getRentabilidad() == maximo)
+                    casillasConMaximo.add((Propiedad)ite);
             }
-        }
         return casillasConMaximo;
     }
 
@@ -1162,18 +1169,18 @@ public class Juego {
     }
 
     private ArrayList<Grupo> grupoMasRentable(ArrayList<Casilla> tablero){
-        int maximo=tablero.get(1).getGrupo().getRentabilidad();
+        int maximo=0;
         for(Casilla ite:tablero) {
-            if (ite.getTipo() == 0) {
-                if (ite.getGrupo().getRentabilidad() > maximo)
-                    maximo = ite.getGrupo().getRentabilidad();
+            if (ite instanceof Solar) {
+                if (((Solar)ite).getGrupo().getRentabilidad() > maximo)
+                    maximo = ((Solar)ite).getGrupo().getRentabilidad();
             }
         }
         ArrayList<Grupo> gruposConMaximo = new ArrayList<>();
         for (Casilla ite : tablero) {
-            if(ite.getTipo()==0){
-                if(ite.getGrupo().getRentabilidad()==maximo && !gruposConMaximo.contains(ite.getGrupo()))
-                    gruposConMaximo.add(ite.getGrupo());
+            if(ite instanceof Solar){
+                if(((Solar)ite).getGrupo().getRentabilidad()==maximo && !gruposConMaximo.contains(((Solar)ite).getGrupo()))
+                    gruposConMaximo.add(((Solar)ite).getGrupo());
             }
         }
         return gruposConMaximo;

@@ -1,6 +1,7 @@
 package Procesos.Casillas;
 
 import Procesos.Jugador;
+import Procesos.Tablero;
 
 import java.util.ArrayList;
 
@@ -126,7 +127,7 @@ public class Solar extends Propiedad {
                     edificios.add(edificio);
                     jugador.pagar(edificio.getPrecio());
                     jugador.setFortuna(jugador.getFortuna()+ 2*edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido()+precio);
+                    jugador.setDineroInvertido(jugador.getDineroInvertido()+ getPrecio());
                     edificio.setCasilla(this);
                     Tablero.addCcasa();
                 }
@@ -140,7 +141,7 @@ public class Solar extends Propiedad {
                     edificios.add(edificio);
                     jugador.pagar(edificio.getPrecio());
                     jugador.setFortuna(jugador.getFortuna()+ 2*edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido()+precio);
+                    jugador.setDineroInvertido(jugador.getDineroInvertido()+ getPrecio());
                     edificio.setCasilla(this);
                     Tablero.addChotel();
                     edificios.removeIf(ite -> ite.getTipo() == 0);
@@ -155,7 +156,7 @@ public class Solar extends Propiedad {
                     edificios.add(edificio);
                     jugador.pagar(edificio.getPrecio());
                     jugador.setFortuna(jugador.getFortuna()+ 2*edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido()+precio);
+                    jugador.setDineroInvertido(jugador.getDineroInvertido()+ getPrecio());
                     edificio.setCasilla(this);
                     Tablero.addCpiscina();
                 }
@@ -169,7 +170,7 @@ public class Solar extends Propiedad {
                     edificios.add(edificio);
                     jugador.pagar(edificio.getPrecio());
                     jugador.setFortuna(jugador.getFortuna()+ 2*edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido()+precio);
+                    jugador.setDineroInvertido(jugador.getDineroInvertido()+ getPrecio());
                     edificio.setCasilla(this);
                     Tablero.addCdeporte();
                 }
@@ -179,11 +180,11 @@ public class Solar extends Propiedad {
 
     /**
      * Realiza las comprobaciones correspondientes, destruye un edificio y devuelve su coste al jugador
-     * @param edificio
-     * @param jugador
+     * @param edificio Edificio a vender
+     * @param jugador Jugador que lo vende (comprobación interna)
      */
     public void venderEdificio(Edificio edificio, Jugador jugador){
-        if (propietario.equals(jugador)&&!hipotecado&&edificio!=null){
+        if (getPropietario().equals(jugador)&&!getHipotecado()&&edificio!=null){
             jugador.addDinero(edificio.getPrecio()/2);
             System.out.println("Cobras "+edificio.getPrecio()+" por "+edificio.getIdentificador());
             removeEdificio(edificio);
@@ -192,7 +193,7 @@ public class Solar extends Propiedad {
     }
     public void venderEdificio(String sedificio, Jugador jugador){
         Edificio edificio = getEdificio(sedificio);
-        if (propietario.equals(jugador)&&!hipotecado&&edificio!=null){
+        if (getPropietario().equals(jugador)&&!getHipotecado()&&edificio!=null){
             jugador.addDinero(edificio.getPrecio()/2);
             removeEdificio(edificio);
         }
@@ -212,4 +213,7 @@ public class Solar extends Propiedad {
         return edificios;
     }
 
+    public Grupo getGrupo() {
+        return grupo;
+    }
 }

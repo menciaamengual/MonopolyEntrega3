@@ -104,5 +104,9 @@ public abstract class Propiedad extends Casilla {
     }
     //Estadísticas
     //Aquí apáñate tu @menciamengual
+
+    public int getRentabilidad() {
+        return rentabilidad;
+    }
 }
 

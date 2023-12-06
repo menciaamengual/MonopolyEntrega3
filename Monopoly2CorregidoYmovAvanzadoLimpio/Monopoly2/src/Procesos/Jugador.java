@@ -2,6 +2,8 @@ package Procesos;
 
 import Procesos.Casillas.Casilla;
 import Procesos.Casillas.Edificio;
+import Procesos.Casillas.Propiedad;
+import Procesos.Casillas.Solar;
 
 import java.util.*;
 
@@ -105,7 +107,7 @@ public class Jugador {
         return nombre;
     }
 
-    public ArrayList<Casilla> getPropiedades() {
+    public ArrayList<Propiedad> getPropiedades() {
         return propiedades;
     }
 
@@ -394,7 +396,5 @@ public class Jugador {
                 "edificios: "+edificios+"\n" +
                 "}";
     }
-
-
 }
 

@@ -7,7 +7,7 @@ import Procesos.Jugador;
 
 public class Grupo{
     private String color;
-    private ArrayList<Casilla> casillas;
+    private ArrayList<Solar> casillas;
     private int tam;
 
     private int precio; //Precio por casilla
@@ -49,7 +49,7 @@ public class Grupo{
     }
 
     //Getters
-    public ArrayList<Casilla> getCasillas() {
+    public ArrayList<Solar> getCasillas() {
         return casillas;
     }
 
@@ -81,11 +81,11 @@ public class Grupo{
 //Setters
 
 
-    public void setCasillas(ArrayList<Casilla> casillas) {
+    public void setCasillas(ArrayList<Solar> casillas) {
         this.casillas = casillas;
     }
 
-    public void addCasilla (Casilla casilla){
+    public void addCasilla (Solar casilla){
         this.casillas.add(casilla);
     }
 
