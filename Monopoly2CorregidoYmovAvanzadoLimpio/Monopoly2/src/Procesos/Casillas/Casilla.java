@@ -5,13 +5,19 @@ import Procesos.Jugador;
 import java.util.ArrayList;
 
 public abstract class Casilla{
-    int posicion; //0-43
-    String nombre;
-    int visitas;
+    private int posicion; //0-43
+    private String nombre;
+    private int visitas;
     private ArrayList<Jugador> ocupantes;
     public static final int lonMaxNombre = 11; //Longitud del nombre en impresión. Función que mira long del nombre + largo
 
+    public Casilla(int posicion, String nombre){
+        this.posicion = posicion;
+        this.nombre = nombre;
 
+        visitas = 0;
+        ocupantes = new ArrayList<>(6);
+    }
 
     //Impresión por pantalla
     String StringAvatares(){
@@ -64,6 +70,14 @@ public abstract class Casilla{
     }
     public Boolean isComprable(){ //Suponemos que no se puede comprar una casilla que ya sea de otro jugador
         return false; //En todos los casos que no este overrideado (hijos comprables), devuelve falso
+    }
+
+    //Nombre
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    public String getNombre() {
+        return nombre;
     }
 }
 
