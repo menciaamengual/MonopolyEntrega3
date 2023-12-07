@@ -391,7 +391,7 @@ public class Juego {
      * Función de compra de la casilla, con comprobación de si el jugadorActual tienen suficiente dinero
      * Realiza la transacción correspondiente entre el jugador y la banca, y mueve la propiedad de la Procesos.Casilla, y del grupo en caso de que corresponda
      */
-    public void comprarCasilla() {
+    public void comprarCasilla() { //todo garantizar que se añade a propiedades en Jugador
         Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
         if (!(casillac instanceof Propiedad)) { //RARO
             System.out.println("No puedes comprar esta casilla");
