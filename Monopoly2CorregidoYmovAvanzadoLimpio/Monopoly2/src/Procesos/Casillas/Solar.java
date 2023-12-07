@@ -5,10 +5,10 @@ import Procesos.Tablero;
 
 import java.util.ArrayList;
 
-public class Solar extends Propiedad {
-    private Grupo grupo;
+public final class Solar extends Propiedad {
+    private final Grupo grupo;
     private int alquilerBase;
-    private ArrayList<Edificio> edificios;
+    private final ArrayList<Edificio> edificios;
 
     public Solar(int pBase, int pSalida, int posicion, String nombre, ArrayList<Grupo> grupos, Jugador propietario) {
         super(posicion,nombre,propietario);
@@ -24,7 +24,7 @@ public class Solar extends Propiedad {
     }
 
     //Funciones generales
-    public int calcularAlquiler(){
+    public final int calcularAlquiler(){
         int alq = alquilerBase;
                 if (!edificios.isEmpty()){ //Calculo de número de edificios
                     int ncasas = 0;
@@ -61,7 +61,7 @@ public class Solar extends Propiedad {
 
     //toString
     @Override
-    public String toString (){
+    public final String toString (){
         String formato = "|\u001B[4m%"+lonMaxNombre+"s %"+6+"s\u001B[0m|";
         if (grupo!=null) formato = grupo.colorFormato() + formato + "\u001B[0m";
         return String.format(formato, getNombre(),StringAvatares());
@@ -73,7 +73,7 @@ public class Solar extends Propiedad {
      *  Añadimos dinero al propietario
      *  Ponemos hipotecado a true.
       */
-    public void hipotecar(){
+    public final void hipotecar(){
         if (edificios!=null && !edificios.isEmpty()){//Overrideamos esto en solar
             System.out.println("Debes vender todos los edificios antes de hipotecar.");
             return;
@@ -87,7 +87,7 @@ public class Solar extends Propiedad {
         System.out.println("Has hipotecado "+ this+" por "+ getPrecio() /2+"$");
     }
 
-    public void construir(int tipo,Jugador jugador, boolean caida) {
+    public final void construir(int tipo,Jugador jugador, boolean caida) {
         if (grupo.getPropietario()!= getPropietario() && !caida || !jugador.equals(getPropietario())) { //Comprobación de propiedad
             System.out.println("No puedes construir si no tienes todo el grupo on no has caído 2 veces en esta casilla...");
             return;
@@ -183,7 +183,7 @@ public class Solar extends Propiedad {
      * @param edificio Edificio a vender
      * @param jugador Jugador que lo vende (comprobación interna)
      */
-    public void venderEdificio(Edificio edificio, Jugador jugador){
+    public final void venderEdificio(Edificio edificio, Jugador jugador){
         if (getPropietario().equals(jugador)&&!getHipotecado()&&edificio!=null){
             jugador.addDinero(edificio.getPrecio()/2);
             System.out.println("Cobras "+edificio.getPrecio()+" por "+edificio.getIdentificador());
@@ -191,7 +191,7 @@ public class Solar extends Propiedad {
         }
         else System.out.println("No se puede vender este edificio");
     }
-    public void venderEdificio(String sedificio, Jugador jugador){
+    public final void venderEdificio(String sedificio, Jugador jugador){
         Edificio edificio = getEdificio(sedificio);
         if (getPropietario().equals(jugador)&&!getHipotecado()&&edificio!=null){
             jugador.addDinero(edificio.getPrecio()/2);
@@ -199,21 +199,40 @@ public class Solar extends Propiedad {
         }
         else System.out.println("No se puede vender este edificio");
     }
-    public Edificio getEdificio(String identificador){
+    public final Edificio getEdificio(String identificador){
         for(Edificio ite: edificios){
             if (ite.getIdentificador().equals(identificador)) return ite;
         }
         return null; //Comprobar en la función desde la que se llame
     }
-    public void removeEdificio(Edificio edificio){
+    public final void removeEdificio(Edificio edificio){
         edificios.remove(edificio);
     }
 
-    public ArrayList<Edificio> getEdificios() {
+    public final ArrayList<Edificio> getEdificios() {
         return edificios;
     }
 
-    public Grupo getGrupo() {
+    public final Grupo getGrupo() {
         return grupo;
+    }
+
+    public final String descripcionDetallada(){
+        return "{\n" +
+                        "nombre: " + getNombre() +"\n"+
+                        "color: " + grupo.getColor() + "\n"+ //Estaría chulo meterle el formateo para que se vea del color que es
+                        "tipo: Solar \n" +
+                        "Propietario: "+ getPropietario().getNombre()+" \n" +
+                        "Precio: "+ getPrecio() +" \n" +
+                        "Edificios: " + edificios +"\n"+
+                        "ALQUILER ACTUAL: "+ calcularAlquiler() + "$\n" +
+                        "   -Alquiler Básico: "+alquilerBase+"$ \n" +
+                        "   -Alquiler con tod el grupo: "+alquilerBase*2+"$ \n" +
+                        //Podemos meter aquí alquiler con construcones (igual no todas las combinaciones, pero un poquito).
+                        "Puedes hipotecar esta casilla por "+ getPrecio() /2+"$\n"+
+
+                        //"Ocupantes: "+ ocupantes +" \n" +
+
+                        "}\n";
     }
 }

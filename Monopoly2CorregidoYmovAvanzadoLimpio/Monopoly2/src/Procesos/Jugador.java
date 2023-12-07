@@ -1,9 +1,6 @@
 package Procesos;
 
-import Procesos.Casillas.Casilla;
-import Procesos.Casillas.Edificio;
-import Procesos.Casillas.Propiedad;
-import Procesos.Casillas.Solar;
+import Procesos.Casillas.*;
 
 import java.util.*;
 
@@ -15,7 +12,7 @@ public class Jugador {
     private int tipo; //0-4. Ninguno, Pingüino,submarino, maletín y vaso canopo
     private int posicion;
     private int dinero;
-    private ArrayList<Casilla> propiedades;
+    private ArrayList<Propiedad> propiedades;
     private ArrayList<Carta> cartasSuerte;
     private int turnosCarcel; //informa de la situación del jugador respecto de la cárcel:
     // 0: No está en la cárcel / está en la casilla de cárcel pero si tira dados mueve
@@ -214,17 +211,17 @@ public class Jugador {
     public void declararBancarrota(Jugador acreedor) { //acabar función
             ArrayList<Edificio> vacio = new ArrayList<>();
             if (acreedor.isBanca()){
-                for (Casilla ite: propiedades){
-                    int n = ite.getEdificios().size();
+                for (Propiedad ite: propiedades) if (ite instanceof Solar) {
+                    int n = ((Solar)ite).getEdificios().size();
                     for (int i = 0; i<n; i++)
-                        ite.venderEdificio(ite.getEdificios().get(0),this);
+                        ((Solar)ite).venderEdificio(((Solar)ite).getEdificios().get(0),this);
                     ite.setPropietario(acreedor);
                 }
                 propiedades.clear();
             }
             else
                 for (Casilla ite: propiedades){
-                    ite.setPropietario(acreedor);
+                    ((Solar)ite).setPropietario(acreedor);
                 }
         pagar(dinero,acreedor);
             System.out.println("Ahora estás en banca rota");
@@ -270,7 +267,7 @@ public class Jugador {
 
     public boolean tienePropiedadesSinHipotecar() {
         for (Casilla ite : propiedades) {
-            if (!ite.getHipotecado()) return true;
+            if (!((Propiedad)ite).getHipotecado()) return true;
         }
         return false;
     }
@@ -282,7 +279,7 @@ public class Jugador {
         casillas.get(posicion).setVisitas(casillas.get(posicion).getVisitas()+1);
     }
 
-    public void setPropiedades(ArrayList<Casilla> propiedades) {
+    public void setPropiedades(ArrayList<Propiedad> propiedades) {
         this.propiedades = propiedades;
     }
 
@@ -342,13 +339,13 @@ public class Jugador {
      *
      * @param propiedad
      */
-    public void addPropiedad(Casilla propiedad) {
+    public void addPropiedad(Propiedad propiedad) {
         propiedades.add(propiedad);
-        if (propiedad.getTipo() == 0) { //Solo trabajamos con grupos si es un solar
-            for (Casilla ite : propiedad.getGrupo().getCasillas()) {
+        if (propiedad instanceof Solar) { //Solo trabajamos con grupos si es un solar
+            for (Solar ite : ((Solar)propiedad).getGrupo().getCasillas()) {
                 if (!ite.getPropietario().equals(this) || ite.getPropietario().getNombre().equals("Banca")) return;
             }
-            propiedad.getGrupo().setPropietario(this);
+            ((Solar)propiedad).getGrupo().setPropietario(this);
         }
     }
 
@@ -359,7 +356,7 @@ public class Jugador {
     public int getNTrans() {
         int i = 0;
         for (Casilla casilla : propiedades) {
-            if (casilla.getTipo() == 1) i++;
+            if (casilla instanceof Transporte) i++;
         }
         return i;
     }
@@ -367,7 +364,7 @@ public class Jugador {
     public int getNServicios() {
         int i = 0;
         for (Casilla casilla : propiedades) {
-            if (casilla.getTipo() == 2) i++;
+            if (casilla instanceof Servicios) i++;
         }
         return i;
     }
@@ -382,8 +379,8 @@ public class Jugador {
         ArrayList<Edificio> edificios = new ArrayList<>();
         StringBuilder sProp = new StringBuilder();
         StringBuilder sHip = new StringBuilder();
-        for (Casilla prop : propiedades) {
-            if (prop.getEdificios()!=null) edificios.addAll(prop.getEdificios());
+        for (Propiedad prop : propiedades) {
+            if (prop instanceof Solar && ((Solar)prop).getEdificios()!=null) edificios.addAll(((Solar)prop).getEdificios());
             if (!prop.getHipotecado()) sProp.append(prop.getNombre()).append(" ");
             else sHip.append(prop.getNombre()).append(" ");
         }

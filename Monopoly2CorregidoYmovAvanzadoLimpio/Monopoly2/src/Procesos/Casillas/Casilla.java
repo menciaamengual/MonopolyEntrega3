@@ -79,6 +79,24 @@ public abstract class Casilla{
     public String getNombre() {
         return nombre;
     }
+
+    public void setVisitas(int visitas) {
+        this.visitas = visitas;
+    }
+
+    public int getVisitas() {
+        return visitas;
+    }
+
+    public String descripcionDetallada() {
+        return "Descripción genérica";
+    }
+
+    public String descripcion(){
+        return "{\nnombre: " + getNombre() +"\n"+
+                "tipo: "+ getClass() +" \n" +
+                "}\n";
+    }
 }
 
 //
@@ -175,7 +193,7 @@ public abstract class Casilla{
 //        }
 //
 //        if (grupo.getPropietario()!=propietario && !caida || !jugador.equals(propietario)) { //Comprobación de propiedad
-//            System.out.println("No puedes construir si no tienes todo el grupo on no has caído 2 veces en esta casilla...");
+//            System.out.println("No puedes construir si no tienes tod el grupo on no has caído 2 veces en esta casilla...");
 //            return;
 //        }
 //
@@ -328,6 +346,7 @@ public abstract class Casilla{
 //
 //
 //    public void removeOcupante(Jugador jugador){
+//        ArrayList<Jugador> aux = new ArrayList<>(6);
 //        ArrayList<Jugador> aux = new ArrayList<>(6);
 //        for (Jugador ite: ocupantes){
 //            if (!ite.equals(jugador)) aux.add(ite);
@@ -486,7 +505,7 @@ public abstract class Casilla{
 //                        "Edificios: " + edificios +"\n"+
 //                        "ALQUILER ACTUAL: "+ calcularAlquiler(null) + "$\n" +
 //                        "   -Alquiler Básico: "+alquilerBase+"$ \n" +
-//                        "   -Alquiler con todo el grupo: "+alquilerBase*2+"$ \n" +
+//                        "   -Alquiler con tod el grupo: "+alquilerBase*2+"$ \n" +
 //                        //Podemos meter aquí alquiler con construcones (igual no todas las combinaciones, pero un poquito).
 //                        "Puedes hipotecar esta casilla por "+precio/2+"$\n"+
 //
@@ -544,7 +563,7 @@ public abstract class Casilla{
 //                "color: " + grupo.getColor() + "\n"+ //Estaría chulo meterle el formateo para que se vea del color que es
 //                "tipo: "+getTipoString()+" \n" +
 //                " Alquiler Básico: "+alquilerBase+" \n" +
-//                " Alquiler con todo el grupo: "+alquilerBase*2+" \n" +
+//                " Alquiler con tod el grupo: "+alquilerBase*2+" \n" +
 //                "valor: "+precio+" \n" +
 //                "valor: "+precio+" \n" +
 //

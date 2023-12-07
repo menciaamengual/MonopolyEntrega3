@@ -79,7 +79,7 @@ public abstract class Propiedad extends Casilla {
 
     /**
      * Comprar una casilla a la banca
-     * @param jugador
+     * @param jugador comprador
      */
     public void comprar(Jugador jugador){
         if (jugador.getDinero() >= getPrecio()) {
@@ -93,8 +93,8 @@ public abstract class Propiedad extends Casilla {
 
     /**
      * Vender una casilla de un jugador a otro
-     * @param vendedor
-     * @param comprador
+     * @param vendedor SE
+     * @param comprador SE
      */
     public void vender(Jugador vendedor, Jugador comprador){
 
@@ -107,6 +107,14 @@ public abstract class Propiedad extends Casilla {
 
     public int getRentabilidad() {
         return rentabilidad;
+    }
+
+    public String descripcion(){
+        return "{\nnombre: " + getNombre() +"\n"+
+                "tipo: "+ getClass() +" \n" +
+                "valor: "+ precio +" \n" +
+                "Propietario: " + getPropietario() +"\n" +
+                "}\n";
     }
 }
 

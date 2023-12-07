@@ -8,27 +8,27 @@ import Procesos.Casillas.*;
 public class Juego {
     //ATRIBUTOS
     private static Tablero tablero;
-    private int dineroInicial;
-    private int pSalida; //Premio salida
+    private final int dineroInicial;
+    private final int pSalida; //Premio salida
     private int pBase; //Precio casilla primer grupo
     private Jugador jugadorActual;
-    private ArrayList<Jugador> jugadores;
+    private final ArrayList<Jugador> jugadores;
     // private boolean hayBug; //Encontramos un error por el cual, tras la finalización del turno de un coche con movimiento avanzado, el siguiente jugador no puede tirar. Este booleano lo detectará y nos permitirá solucionarlo en menuAccion.
 
-    private Jugador banca;
-    private Dado dado;
+    private final Jugador banca;
+    private final Dado dado;
     private Carta carta;
-    private int precioCarcel;
+    private final int precioCarcel;
     private boolean pagando; //Un booleano que se activa si el usuario está en trámites de pagar una deuda (para darle opciones de vender, hipotecar, etc)...
     private int pagoPendiente;
     private Jugador cobradorPendiente;
-    private StringBuilder avataresrep = new StringBuilder("!");
+    private final StringBuilder avataresRep = new StringBuilder("!");
 
     Map<Jugador, Map<Casilla, Integer>> contadorCasillas = new HashMap<>();
 
     private char generaCharRandom() {
-        Random randomc = new Random();
-        return (char) (randomc.nextInt(26) + 'A');
+        Random randomC = new Random();
+        return (char) (randomC.nextInt(26) + 'A');
     }
 
     //CONSTRUCTORES
@@ -55,8 +55,8 @@ public class Juego {
         char miavatar;
         do {
             miavatar = generaCharRandom();
-        } while (avataresrep.toString().contains(String.valueOf(miavatar)));
-        avataresrep.append(miavatar);
+        } while (avataresRep.toString().contains(String.valueOf(miavatar)));
+        avataresRep.append(miavatar);
         int tipo;
         String inputTipo;
         do {
@@ -72,7 +72,7 @@ public class Juego {
             }
         } while (tipo == -1);
         jugadores.add(new Jugador(dineroInicial, miNombre, miavatar, tipo));
-        for (Jugador ite:jugadores)
+        for (Jugador ite : jugadores)
             ite.setFortuna(dineroInicial);
     }
 
@@ -88,54 +88,51 @@ public class Juego {
      * Este método mueve al jugador y ejecuta las funciones de la casilla de salida
      * Si el movimiento activado está desactivado, no llama al siguiente turno, ni al menú, ni nada, eso va fuera
      * Pero como diría J. Mota, ¿pero y si sí? Si está activado, es necesario que se ejecuten ciertas acciones dentro de la función.
+     *
      * @param avance, movAvanzado
      */
     private void avanzarCasillas(int avance, boolean movAvanzado) {
-        if(!movAvanzado){
-            if(avance>=0){ // Funcionamiento normal (realmente podríamos poner "if getposicion+avance >0" pero así queda más legible)
-                if ((jugadorActual.getPosicion() + avance) > 39){
+        if (!movAvanzado) {
+            if (avance >= 0) { // Funcionamiento normal (realmente podríamos poner "if getposicion+avance >0" pero así queda más legible)
+                if ((jugadorActual.getPosicion() + avance) > 39) {
                     addVuelta(jugadorActual);
-                    System.out.println("Pasas por la casilla de salida y cobras " + pSalida+"$");
-                    jugadorActual.setDinero(jugadorActual.getDinero()+pSalida);
-                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance)-40, tablero.getCasillas());
+                    System.out.println("Pasas por la casilla de salida y cobras " + pSalida + "$");
+                    jugadorActual.setDinero(jugadorActual.getDinero() + pSalida);
+                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance) - 40, tablero.getCasillas());
+                } else {
+                    jugadorActual.setPosicion(jugadorActual.getPosicion() + avance, tablero.getCasillas());
                 }
-                else {
-                    jugadorActual.setPosicion(jugadorActual.getPosicion()+avance , tablero.getCasillas());
-                }
-            }
-            else{ // Avance negativo
+            } else { // Avance negativo
                 if ((jugadorActual.getPosicion() + avance) <= 0) { // Si se pasa por la casilla de salida
-                    jugadorActual.setVueltas(jugadorActual.getVueltas()-1); // Se resta una vuelta
-                    System.out.println("Pasas por la casilla de salida en sentido contrario y pagas " + pSalida+"$");
+                    jugadorActual.setVueltas(jugadorActual.getVueltas() - 1); // Se resta una vuelta
+                    System.out.println("Pasas por la casilla de salida en sentido contrario y pagas " + pSalida + "$");
                     jugadorActual.pagar(pSalida, banca);
-                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance)+40, tablero.getCasillas());
-                }
-                else {
-                    jugadorActual.setPosicion(jugadorActual.getPosicion() + avance , tablero.getCasillas());
+                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance) + 40, tablero.getCasillas());
+                } else {
+                    jugadorActual.setPosicion(jugadorActual.getPosicion() + avance, tablero.getCasillas());
                 }
             }
-        }
-        else{ // Movimiento avanzado activado
-            if(jugadorActual.getTipoMov()==0){ // PELOTA
+        } else { // Movimiento avanzado activado
+            if (jugadorActual.getTipoMov() == 0) { // PELOTA
                 jugadorActual.setAuxMovAvanzado(1); // Indica que el turno aún está en curso
-                if(avance>4){
+                if (avance > 4) {
                     avanzarCasillas(4, false);
                     int aux = jugadorActual.getPosicion(); // guardamos la posición tras avanzar 4 casillas para comprobar paridades
-                    for (int i=5; i<=avance; i++){
+                    for (int i = 5; i <= avance; i++) {
                         avanzarCasillas(1, false); // avanzamos una casilla
-                        if(jugadorActual.getPosicion()==30){ // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
+                        if (jugadorActual.getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
                             return;
                         }
-                        if (i==avance){
+                        if (i == avance) {
                             jugadorActual.setAuxMovAvanzado(0);
                             System.out.println("Ya has pasado por todas tus paradas.");
                             return;
                         }
-                        if((jugadorActual.getPosicion()-aux)%2!=0){ // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
+                        if ((jugadorActual.getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
                             System.out.println("¡Momento de pararse! Introduce \"acabar parada\" para avanzar a la siguiente casilla");
                             tablero.imprimirTablero();
                             accionCasilla();
-                            if(jugadorActual.inCarcel()){
+                            if (jugadorActual.inCarcel()) {
                                 break;
                             }
                             menuAccion(true);
@@ -145,23 +142,23 @@ public class Juego {
                     }
                     return;
                 }
-                if(avance<=4){
+                else {
                     int aux = jugadorActual.getPosicion(); // guardamos la posición para comprobar paridades
-                    for(int i=avance; i>0; i--){
+                    for (int i = avance; i > 0; i--) {
                         avanzarCasillas(-1, false);
-                        if(jugadorActual.getPosicion()==30){ // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
+                        if (jugadorActual.getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
                             return;
                         }
-                        if (i==1){ // Si es la última parada
+                        if (i == 1) { // Si es la última parada
                             jugadorActual.setAuxMovAvanzado(0);
                             System.out.println("Ya has pasado por todas tus paradas.");
                             return;
                         }
-                        if((jugadorActual.getPosicion()-aux)%2!=0){ // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
+                        if ((jugadorActual.getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
                             System.out.println("¡Momentito de pararse! Introduce \"acabar parada\" para ir a la próxima casilla");
                             tablero.imprimirTablero();
                             accionCasilla();
-                            if(jugadorActual.inCarcel()){
+                            if (jugadorActual.inCarcel()) {
                                 break;
                             }
                             menuAccion(true);
@@ -169,14 +166,12 @@ public class Juego {
                         // Si es par, no se hace nada.
                     }
                 }
-            }
-            else if(jugadorActual.getTipoMov()==1) { // COCHE
-                if(avance>=4){
+            } else if (jugadorActual.getTipoMov() == 1) { // COCHE
+                if (avance >= 4) {
                     avanzarCasillas(avance, false);
                     System.out.println("Puedes tirar los dados hasta 3 veces más mientras saques más de un 3.");
                     jugadorActual.setAuxMovAvanzado(3);
-                }
-                else{
+                } else {
                     avanzarCasillas(-avance, false);
                     jugadorActual.setAuxMovAvanzado(-3); // Los números negativos sin el "-" indicarán los turnos restantes sin poder tirar (em el turno actual, por eso se inicializa en -3 y no en -2. al acabar el turno se suma 1, con lo que al acabar el turno en el que se estropea el motor tienes -3+1 = (-)2 turnos más sin tirar)
                     System.out.println("Se te ha estropeado el motor y deberás estar dos turnos sin tirar mientras se arregla.");
@@ -195,23 +190,22 @@ public class Juego {
         System.out.println(carta.getCartasSuerte().get(numCarta));
         switch (numCarta) {
             case 0:
-                int contC=0, contH=0, contP=0, contD=0;
-                for(Casilla ite: jugadorActual.getPropiedades()){
-                        if (ite.getTipo()==0) for(Edificio cite: ite.getEdificios()){
-                            if(cite.getTipo()==0) contC++;
-                            if(cite.getTipo()==1) contH++;
-                            if(cite.getTipo()==2) contP++;
-                            if(cite.getTipo()==3) contD++;
-                        }
+                int contC = 0, contH = 0, contP = 0, contD = 0;
+                for (Casilla ite : jugadorActual.getPropiedades()) {
+                    if (ite instanceof Solar) for (Edificio cite : ((Solar)ite).getEdificios()) {
+                        if (cite.getTipo() == 0) contC++;
+                        if (cite.getTipo() == 1) contH++;
+                        if (cite.getTipo() == 2) contP++;
+                        if (cite.getTipo() == 3) contD++;
                     }
-
-                int total=(100*contC)+(200*contH)+(300*contP)+(400*contD);
-                if(total==0) {
-                    System.out.println("Como aun no tienes edificios construidos, te libras");
                 }
-                else {
+
+                int total = (100 * contC) + (200 * contH) + (300 * contP) + (400 * contD);
+                if (total == 0) {
+                    System.out.println("Como aun no tienes edificios construidos, te libras");
+                } else {
                     System.out.println("En total, tienes que pagar" + total + "$");
-                    pagarAv(jugadorActual,total);
+                    pagarAv(jugadorActual, total);
                     //jugadorActual.pagar(total); MAL
                 }
                 break;
@@ -223,9 +217,9 @@ public class Juego {
                         aux.add(ite); //creamos una lista de los jugadores a los que pagar
                 }
                 for (Jugador ite : aux) {
-                    pagarAv(jugadorActual,500, ite);
+                    pagarAv(jugadorActual, 500, ite);
                     jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + 500);
-                    ite.setPremiosInversionesOBote(ite.getPremiosInversionesOBote()+500);
+                    ite.setPremiosInversionesOBote(ite.getPremiosInversionesOBote() + 500);
                 }
                 break;
 
@@ -241,32 +235,30 @@ public class Juego {
                 break;
 
             case 4:
-                int alquilersuerte=tablero.getCasilla(jugadorActual.getPosicion()).calcularAlquiler(dado)*2;
+                int alquilersuerte = tablero.getCasilla(jugadorActual.getPosicion()).calcularAlquiler(dado) * 2;
                 if (jugadorActual.getPosicion() == 7) {
                     jugadorActual.setPosicion(15, tablero.getCasillas());
-                    if(!tablero.getCasilla(15).getPropietario().equals(jugadorActual) && !tablero.getCasilla(15).getPropietario().equals(banca) && !tablero.getCasilla(15).getHipotecado()){
+                    if (!tablero.getCasilla(15).getPropietario().equals(jugadorActual) && !tablero.getCasilla(15).getPropietario().equals(banca) && !tablero.getCasilla(15).getHipotecado()) {
                         tablero.imprimirTablero();
-                        pagarAv(jugadorActual,alquilersuerte, tablero.getCasilla(15).getPropietario());
+                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(15).getPropietario());
                         tablero.getCasilla(15).setRentabilidad(tablero.getCasilla(15).getRentabilidad() + alquilersuerte);
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
                         tablero.getCasilla(15).getPropietario().setCobroDeAlquileres(tablero.getCasilla(15).getPropietario().getCobroDeAlquileres() + alquilersuerte);
                         System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(15).getNombre());
-                    }
-                    else if (tablero.getCasilla(15).getHipotecado()) {
+                    } else if (tablero.getCasilla(15).getHipotecado()) {
                         System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
                     }
                 }
                 if (jugadorActual.getPosicion() == 22) {
                     jugadorActual.setPosicion(25, tablero.getCasillas());
-                    if(!tablero.getCasilla(25).getPropietario().equals(jugadorActual) && !tablero.getCasilla(25).getPropietario().equals(banca) && !tablero.getCasilla(25).getHipotecado()){
+                    if (!tablero.getCasilla(25).getPropietario().equals(jugadorActual) && !tablero.getCasilla(25).getPropietario().equals(banca) && !tablero.getCasilla(25).getHipotecado()) {
                         tablero.imprimirTablero();
-                        pagarAv(jugadorActual,alquilersuerte, tablero.getCasilla(25).getPropietario());
+                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(25).getPropietario());
                         tablero.getCasilla(25).setRentabilidad(tablero.getCasilla(25).getRentabilidad() + alquilersuerte);
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
                         tablero.getCasilla(25).getPropietario().setCobroDeAlquileres(tablero.getCasilla(25).getPropietario().getCobroDeAlquileres() + alquilersuerte);
                         System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(25).getNombre());
-                    }
-                    else if (tablero.getCasilla(25).getHipotecado()) {
+                    } else if (tablero.getCasilla(25).getHipotecado()) {
                         System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
                     }
 
@@ -278,14 +270,13 @@ public class Juego {
                     jugadorActual.addDinero(pSalida);
                     jugadorActual.setPasarPorCasillaDeSalida(jugadorActual.getPasarPorCasillaDeSalida() + pSalida);
                     addVuelta(jugadorActual);
-                    if(!tablero.getCasilla(5).getPropietario().equals(jugadorActual) && !tablero.getCasilla(5).getPropietario().equals(banca) && !tablero.getCasilla(5).getHipotecado()){
-                        pagarAv(jugadorActual,alquilersuerte, tablero.getCasilla(5).getPropietario());
+                    if (!tablero.getCasilla(5).getPropietario().equals(jugadorActual) && !tablero.getCasilla(5).getPropietario().equals(banca) && !tablero.getCasilla(5).getHipotecado()) {
+                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(5).getPropietario());
                         tablero.getCasilla(5).setRentabilidad(tablero.getCasilla(5).getRentabilidad() + alquilersuerte);
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
                         tablero.getCasilla(5).getPropietario().setCobroDeAlquileres(tablero.getCasilla(5).getPropietario().getCobroDeAlquileres() + alquilersuerte);
                         System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(5).getNombre());
-                    }
-                    else if (tablero.getCasilla(5).getHipotecado()) {
+                    } else if (tablero.getCasilla(5).getHipotecado()) {
                         System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
                     }
                 }
@@ -308,9 +299,9 @@ public class Juego {
                         aux.add(ite); //literal igual que en suerte
                 }
                 for (Jugador ite : aux) {
-                    pagarAv(jugadorActual,200, ite);
+                    pagarAv(jugadorActual, 200, ite);
                     jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + 200);
-                    ite.setPremiosInversionesOBote(ite.getPremiosInversionesOBote()+200);
+                    ite.setPremiosInversionesOBote(ite.getPremiosInversionesOBote() + 200);
                 }
                 break;
 
@@ -350,44 +341,42 @@ public class Juego {
      * @param
      */
     public void accionCasilla() {
-        contadorCasillas.get(jugadorActual).put(jugadorActual.getCasilla(tablero.getCasillas()),contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas()))+1);
+        contadorCasillas.get(jugadorActual).put(jugadorActual.getCasilla(tablero.getCasillas()), contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) + 1);
         //System.out.println("Caída "+contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())));
         int t = jugadorActual.getCasilla(tablero.getCasillas()).getTipo();
         Casilla casilla = jugadorActual.getCasilla(tablero.getCasillas());
-        Grupo grupo=casilla.getGrupo();
+        Grupo grupo = casilla.getGrupo();
         carta = new Carta(jugadorActual.getPosicion());
         if (t != 4 && t != 7) { //La casilla de carcel, parking gratuido y salida no hacen nada. El "salario" de salida está implementado con el movimiento
             switch (t) {
                 case 0:
                 case 1:
                 case 2:
-                    if (!casilla.getPropietario().equals(jugadorActual)&&!casilla.getPropietario().equals(banca) && !casilla.getHipotecado()) {
-                        pagarAv(jugadorActual,casilla.calcularAlquiler(dado), casilla.getPropietario());
-                        casilla.setRentabilidad(casilla.getRentabilidad()+casilla.calcularAlquiler(dado)); //edificios??
+                    if (!casilla.getPropietario().equals(jugadorActual) && !casilla.getPropietario().equals(banca) && !casilla.getHipotecado()) {
+                        pagarAv(jugadorActual, casilla.calcularAlquiler(dado), casilla.getPropietario());
+                        casilla.setRentabilidad(casilla.getRentabilidad() + casilla.calcularAlquiler(dado)); //edificios??
                         jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + casilla.calcularAlquiler(dado));
                         casilla.getPropietario().setCobroDeAlquileres(casilla.getPropietario().getCobroDeAlquileres() + casilla.calcularAlquiler(dado));
-                        if(t==0)
-                            grupo.setRentabilidad(grupo.getRentabilidad()+casilla.calcularAlquiler(dado));
+                        if (t == 0)
+                            grupo.setRentabilidad(grupo.getRentabilidad() + casilla.calcularAlquiler(dado));
                         System.out.println("Pagas " + casilla.calcularAlquiler(dado) + "$ por caer en " + casilla.getNombre());
                     } else if (casilla.getHipotecado()) {
                         System.out.println("Casilla hipotecada... No pagas alquiler :)");
-                    }
-                    else if(casilla.getPropietario().equals(banca)){
+                    } else if (casilla.getPropietario().equals(banca)) {
                         System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
+                    } else if (casilla.getPropietario().equals(jugadorActual)) {
+                        System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
                     }
-                    else if(casilla.getPropietario().equals(jugadorActual)){
-                    System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
-                }
                     break;
                 case 3:
                     carta.barajar();
                     int indice;
                     String entradaString;
-                    do{
+                    do {
                         System.out.println("Elige una carta (introduciendo un numero del 1 al 6)");
                         Scanner entrada = new Scanner(System.in);
                         entradaString = entrada.nextLine();
-                    }while(!entradaString.equals("1")&&!entradaString.equals("2")&&!entradaString.equals("3")&&!entradaString.equals("4")&&!entradaString.equals("5")&&!entradaString.equals("6"));
+                    } while (!entradaString.equals("1") && !entradaString.equals("2") && !entradaString.equals("3") && !entradaString.equals("4") && !entradaString.equals("5") && !entradaString.equals("6"));
 
                     indice = Integer.parseInt(entradaString);
 
@@ -405,9 +394,9 @@ public class Juego {
                     casilla.setAlquilerBase(0);
                     break;
                 case 6: //Impuesto
-                    pagarAv(jugadorActual,casilla.calcularAlquiler(dado), banca);
+                    pagarAv(jugadorActual, casilla.calcularAlquiler(dado), banca);
                     tablero.getCasilla(20).setAlquilerBase(tablero.getCasilla(20).getAlquilerBase() + casilla.calcularAlquiler(dado));
-                    System.out.println("Has caído en la casilla impuestos, debes pagar " + casilla.calcularAlquiler(dado)+"$");
+                    System.out.println("Has caído en la casilla impuestos, debes pagar " + casilla.calcularAlquiler(dado) + "$");
                     jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + casilla.calcularAlquiler(dado));
                     break;
                 case 8:
@@ -449,7 +438,7 @@ public class Juego {
             System.out.println("  comprar propiedad: si tienes dinero, compra la casilla en la que se encuentra tu avatar");
         System.out.println("  listar en venta: lista las casillas(solares, servicios y transportes) disponibles para comprar");
         System.out.println("  ver tablero: imprime el tablero por pantalla");
-        if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0 && jugadorActual.getAuxMovAvanzado()==1) {// Si está en modo avanzado, no ha terminado de pararse en las casillas y es pelota
+        if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 1) {// Si está en modo avanzado, no ha terminado de pararse en las casillas y es pelota
             System.out.println("  acabar parada: visita la próxima casilla disponible tras moverte con movimiento avanzado");
         }
         System.out.println("  fin partida: termina el juego");
@@ -461,17 +450,17 @@ public class Juego {
      * Realiza la transacción correspondiente entre el jugador y la banca, y mueve la propiedad de la Procesos.Casilla, y del grupo en caso de que corresponda
      */
     public void comprarCasilla() {
-        Casilla casilla = jugadorActual.getCasilla(tablero.getCasillas());
-//        if (casilla.getTipo()>2){
-//            System.out.println("No puedes comprar esta casilla");
-//            return;
-//        }
+        Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
+        if (!(casillac instanceof Propiedad casilla)){ //RARO
+            System.out.println("No puedes comprar esta casilla");
+            return;
+        }
         if (jugadorActual.getDinero() >= casilla.getPrecio()) {
             casilla.getPropietario().addDinero(casilla.getPrecio());
             casilla.setPropietario(jugadorActual);
             jugadorActual.setDinero(jugadorActual.getDinero() - casilla.getPrecio());
             jugadorActual.setDineroInvertido(jugadorActual.getDineroInvertido() + casilla.getPrecio());
-            jugadorActual.setFortuna(jugadorActual.getFortuna()+ casilla.getPrecio());
+            jugadorActual.setFortuna(jugadorActual.getFortuna() + casilla.getPrecio());
         } else System.out.println("Cuidado... Ya no tienes dinero suficiente para comprar esta casilla.");
     }
 
@@ -480,7 +469,7 @@ public class Juego {
      * Llamamos desde la función menuAcción como método para mantener la información de haTirado.
      * Usar recursividad aquí no debería dar problemas pq contamos con que un jugador no haga 20 acciones distintas en su turno
      *
-     * @param haTirado
+     * @param haTirado Si ha tirado o no.
      * @return devuelve un booleano para indicar si sigue la partida o no
      */
     public boolean menuAccion(boolean haTirado) { //Lee y llama a la acción indicada sobre el jugadorActual
@@ -512,8 +501,8 @@ public class Juego {
                 if (entradaPartida.length > 1) switch (entradaPartida[1]) {
                     case "Jugadores":
                     case "jugadores":
-                        for (int i = 0; i < jugadores.size(); i++) {
-                            System.out.println(jugadores.get(i));
+                        for (Jugador jugadore : jugadores) {
+                            System.out.println(jugadore);
                         }
                         return menuAccion(haTirado);
                     case "en":
@@ -539,27 +528,28 @@ public class Juego {
                         return menuAccion(haTirado);
                     case "Edificios":
                     case "edificios":
-                        if (entradaPartida.length>2){
-                            for (Grupo ite: tablero.getGrupos()){
-                                if (ite.getColor().equals(entradaPartida[2])){
-                                    for (Casilla cite: ite.getCasillas()){
-                                        for (Edificio eite: cite.getEdificios())
-                                            System.out.println(" "+eite.getIdentificador()+" - "+eite.getCasilla());
+                        if (entradaPartida.length > 2) {
+                            for (Grupo ite : tablero.getGrupos()) {
+                                if (ite.getColor().equals(entradaPartida[2])) {
+                                    for (Casilla cite : ite.getCasillas()) {
+                                        if (cite instanceof Solar)
+                                            for (Edificio eite : ((Solar)cite).getEdificios())
+                                                System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
                                     }
                                     return menuAccion(haTirado);
                                 }
                             }
                             System.out.println("No se reconoce el grupo/color");
-                        }
-                        else for (Casilla cite: tablero.getCasillas()){
-                            if (!(cite.getEdificios ()==null)) for(Edificio eite: cite.getEdificios())
-                                System.out.println(" "+eite.getIdentificador()+" - "+eite.getCasilla());
+                        } else for (Casilla cite : tablero.getCasillas()) {
+                            if (cite instanceof Solar)
+                                if (((Solar) cite).getEdificios() != null) for (Edificio eite : ((Solar)cite).getEdificios())
+                                    System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
                         }
                 }
                 break;
             case "hipotecar":
             case "Hipotecar":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("Ya no puedes hipotecar, desgraciadamente estas en bancarrota y la partida se ha acabado para ti.");
                     break;
                 }
@@ -569,20 +559,20 @@ public class Juego {
                         System.out.println("Esta casilla no existe");
                         break;
                     }
-                    if (casilla.getTipo() > 2) {
+                    if (!(casilla instanceof Propiedad)) {
                         System.out.println("Esta casilla no es hipotecable");
                         break;
                     }
-                    if (!casilla.getPropietario().equals(jugadorActual)) {
+                    if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
                         System.out.println("No puedes hipotecar una casilla que no es tuya");
                         break;
                     }
-                    casilla.hipotecar();
+                    ((Propiedad) casilla).hipotecar();
                 }
                 break;
             case "deshipotecar":
             case "Deshipotecar":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
@@ -592,19 +582,19 @@ public class Juego {
                         System.out.println("Esta casilla no existe");
                         break;
                     }
-                    if (casilla.getTipo() > 2) {
+                    if (!(casilla instanceof Propiedad)) {
                         System.out.println("Esta casilla no es hipotecable");
                         break;
                     }
-                    if (!casilla.getPropietario().equals(jugadorActual)) {
+                    if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
                         System.out.println("No puedes deshipotecar una casilla que no es tuya");
                         break;
                     }
-                    casilla.deshipotecar();
+                    ((Propiedad) casilla).deshipotecar();
                 }
                 break;
             case "comprar":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
@@ -614,19 +604,19 @@ public class Juego {
                 }
 
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
-                    if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==1){ // Si es coche
-                        if(jugadorActual.getPuedeComprarPropiedades()){
+                    if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
+                        if (jugadorActual.getPuedeComprarPropiedades()) {
                             if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
                                 System.out.println("No puedes comprar esta propiedad");
                                 return menuAccion(false);
-                            } else{
+                            } else {
                                 comprarCasilla();
-                                System.out.println("Propiedad comprada con éxito por " + jugadorActual.getCasilla(tablero.getCasillas()).getPrecio() + "$");
+                                System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
                                 System.out.println("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
                                 jugadorActual.setPuedeComprarPropiedades(false); //
                                 return menuAccion(false);
                             }
-                        }else{
+                        } else {
                             System.out.println("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
                             return menuAccion(false);
                         }
@@ -634,9 +624,9 @@ public class Juego {
                     if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
                         System.out.println("No puedes comprar esta propiedad");
                         //break;
-                    }else {
+                    } else {
                         comprarCasilla();
-                        System.out.println("Propiedad comprada con éxito por " + jugadorActual.getCasilla(tablero.getCasillas()).getPrecio() + "$");
+                        System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
                         return menuAccion(true);
                     }
                 } else { //Si está intentando comprar otra propiedad le avisamos...
@@ -650,22 +640,23 @@ public class Juego {
                 }
                 break;
             case "salir":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
-                if (entradaPartida.length>1) if (entradaPartida[1].equals("carcel") || entradaPartida[1].equals("cárcel")) {
-                    if (!jugadorActual.inCarcel()) {
-                        System.out.println("No estas en la cárcel...");
-                        return menuAccion(haTirado);
-                    } else {
-                        System.out.println("Pagas " + precioCarcel + " para salir de la cárcel.");
-                        pagarAv(jugadorActual,precioCarcel);
-                        jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + precioCarcel);
-                        jugadorActual.setTurnosCarcel(0);
-                        return menuAccion(true);
+                if (entradaPartida.length > 1)
+                    if (entradaPartida[1].equals("carcel") || entradaPartida[1].equals("cárcel")) {
+                        if (!jugadorActual.inCarcel()) {
+                            System.out.println("No estas en la cárcel...");
+                            return menuAccion(haTirado);
+                        } else {
+                            System.out.println("Pagas " + precioCarcel + " para salir de la cárcel.");
+                            pagarAv(jugadorActual, precioCarcel);
+                            jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + precioCarcel);
+                            jugadorActual.setTurnosCarcel(0);
+                            return menuAccion(true);
+                        }
                     }
-                }
                 break;
             case "ver":
                 if (entradaPartida[1].equals("tablero")) {
@@ -675,7 +666,7 @@ public class Juego {
                 break;
             case "tirar":
             case "lanzar":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
@@ -692,11 +683,10 @@ public class Juego {
 
                         if (jugadorActual.getTurnosCarcel() > 1) {
                             System.out.println("Te quedan " + (jugadorActual.getTurnosCarcel() - 1) + " oportunidades para salir de la cárcel tirando los dados. ¡Adelante!");
-                            if (entradaPartida.length==5 && entradaPartida[2].equals("trucados")){
-                                dado.tirarDados(Integer.parseInt(entradaPartida[3]),Integer.parseInt(entradaPartida[4]));
+                            if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
+                                dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
                                 jugadorActual.addVecesDados();
-                            }
-                            else {
+                            } else {
                                 dado.tirarDados();
                                 jugadorActual.addVecesDados();
                             }
@@ -714,25 +704,24 @@ public class Juego {
                     } else { // SI NO ESTÁ EN LA CÁRCEL...
 
                         // 1. NO LE DEJAMOS TIRAR SI TIENE EL MOTOR ROTO
-                        if (jugadorActual.getTipoMov()==1 && jugadorActual.getAuxMovAvanzado()<0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
+                        if (jugadorActual.getTipoMov() == 1 && jugadorActual.getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
                             System.out.println("Tu motor sigue roto. ¡No puedes moverte!");
                             return menuAccion(true);
                         }
 
                         // 2. HACEMOS RETURN EN LOS CASOS EN LOS QUE *NO* PUEDE LANZAR DADOS
 
-                        if (puedeTirarOtraVez(haTirado) == false){
+                        if (!puedeTirarOtraVez(haTirado)) {
                             System.out.println("¡No puedes volver a tirar los dados!");
                             return menuAccion(true);
                         }
 
                         // SI LLEGAMOS HASTA AQUÍ, EL JUGADOR PUEDE TIRAR. PROCEDEMOS A TIRAR:
 
-                        if (entradaPartida.length==5 && entradaPartida[2].equals("trucados")){
-                            dado.tirarDados(Integer.parseInt(entradaPartida[3]),Integer.parseInt(entradaPartida[4]));
+                        if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
+                            dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
                             jugadorActual.addVecesDados();
-                        }
-                        else {
+                        } else {
                             dado.tirarDados();
                             jugadorActual.addVecesDados();
                         }
@@ -740,66 +729,65 @@ public class Juego {
 
                         // REALIZAMOS LA ACCIÓN CORRESPONDIENTE SI SE SACA DOBLES:
 
-                        if(dado.areEqual()){
-                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==1){ // Si es coche, solo importan los dobles en la última tirada.
-                                if(jugadorActual.getAuxMovAvanzado()==0)
+                        if (dado.areEqual()) {
+                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
+                                if (jugadorActual.getAuxMovAvanzado() == 0)
                                     System.out.println("Has sacado dobles! Puedes volver a tirar.");
-                            }else{ // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
+                            } else { // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
                                 System.out.println("Has sacado dobles! Puedes volver a tirar.");
                             }
-                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0 && jugadorActual.getAuxMovAvanzado()==999){
+                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 999) {
                                 System.out.println("Como el movimiento avanzado está activado, la tirada extra de dados será cuando pases por todas las paradas.");
                             }
                         }
 
                         // DESPUÉS DE TIRAR, AVANZAMOS EN MOVIMIENTO NORMAL O AVANZADO, SEGÚN CORRESPONDA:
 
-                            // Primero, mandamos a la cárcel si corresponde
+                        // Primero, mandamos a la cárcel si corresponde
                         if (dado.getC() == 3) {
                             System.out.println("Has sacado dados dobles 3 veces seguidas. ¡Vas a la cárcel! ");
                             jugadorActual.enviarCarcel(tablero.getCasillas());
-                            if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==1)) tablero.imprimirTablero();
+                            if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1))
+                                tablero.imprimirTablero();
                             return menuAccion(true);
                         }
-                            // Si el Movimiento Avanzado está activado...
-                        if (jugadorActual.getMovAvanzadoActivado()){
-                            if (jugadorActual.getTipoMov() == 0){ // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
-                                if (jugadorActual.getAuxMovAvanzado() == 999){ // Si es el primer turno
-                                    avanzarCasillas(dado.getSuma(), true);
-                                }else{ // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
-                                    avanzarCasillas(dado.getSuma(), false);
-                                }
+                        // Si el Movimiento Avanzado está activado...
+                        if (jugadorActual.getMovAvanzadoActivado()) {
+                            if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                                // Si es el primer turno
+                                // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
+                                avanzarCasillas(dado.getSuma(), jugadorActual.getAuxMovAvanzado() == 999);
                             }
-                            if (jugadorActual.getTipoMov() == 1){ // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                                if(jugadorActual.getAuxMovAvanzado()==999){ // Si es el primer turno
+                            if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                                if (jugadorActual.getAuxMovAvanzado() == 999) { // Si es el primer turno
                                     avanzarCasillas(dado.getSuma(), true);
-                                }else{ // Si no es el primer turno...
-                                    if(jugadorActual.getAuxMovAvanzado() == 0){ // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
+                                } else { // Si no es el primer turno...
+                                    if (jugadorActual.getAuxMovAvanzado() == 0) { // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
                                         avanzarCasillas(dado.getSuma(), false);
-                                    }else{ // Si no acbaó sus tiradas extra
-                                        if (dado.getSuma()>3){
-                                            jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado()-1); // Restamos 1 a las tiradas extra
+                                    } else { // Si no acabó sus tiradas extra
+                                        if (dado.getSuma() > 3) {
+                                            jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() - 1); // Restamos 1 a las tiradas extra
                                             avanzarCasillas(dado.getSuma(), false);
                                             // Avisamos de cuántas tiradas extra le quedan
-                                            if(jugadorActual.getAuxMovAvanzado()>0){
+                                            if (jugadorActual.getAuxMovAvanzado() > 0) {
                                                 System.out.printf("\nLanzamientos extra restantes: %d. Cuando saques menos de un 4, no podrás tirar de nuevo.\n", jugadorActual.getAuxMovAvanzado());
-                                            }else{
-                                                System.out.printf("\nNo te quedan más lanzamientos extra por el movimiento especial.\n");
-                                                if(dado.areEqual()){
-                                                    System.out.printf("\nPero como has sacado dobles... ¡Tienes otra tirada extra!\n");
+                                            } else {
+                                                System.out.print("\nNo te quedan más lanzamientos extra por el movimiento especial.\n");
+                                                if (dado.areEqual()) {
+                                                    System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada extra!\n");
                                                 }
                                             }
-                                        }else{ // Si saca menos de 4, no se mueve y además no tiene más tiradas extra.
+                                        } else { // Si saca menos de 4, no se mueve y además no tiene más tiradas extra.
                                             jugadorActual.setAuxMovAvanzado(0);
                                             System.out.println("\nHas sacado menos de un 4, por lo que no tienes más lanzamientos extra.");
-                                            if(dado.areEqual()){
-                                                System.out.printf("\nPero como has sacado dobles... ¡Tienes otra tirada más!\n");
+                                            if (dado.areEqual()) {
+                                                System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada más!\n");
                                             }
                                         }
                                     }
                                 }
                             }
-                        }else{ // Si el movimiento avanzado no está activado
+                        } else { // Si el movimiento avanzado no está activado
                             avanzarCasillas(dado.getSuma(), false);
                         }
                         tablero.imprimirTablero();
@@ -810,7 +798,7 @@ public class Juego {
                 break;
             case "cambiar":
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("movimiento")) {
-                    if(haTirado){
+                    if (haTirado) {
                         System.out.println("¡Solo puedes cambiar de movimiento al inicio de tu turno!");
                         break;
                     }
@@ -852,48 +840,46 @@ public class Juego {
                         System.out.println("Vaya! No existe este jugador...");
                         break;
                     default:
-                        if (tablero.getCasilla(entradaPartida[1])!=null){
-                                System.out.print(tablero.getCasilla(entradaPartida[1]).descripcionDetallada());
-                                return menuAccion(haTirado);
-                            }
-                            else System.out.println("No hay ninguna casilla que se llame así");
-                        }
+                        if (tablero.getCasilla(entradaPartida[1]) != null) {
+                            System.out.print(tablero.getCasilla(entradaPartida[1]).descripcionDetallada());
+                            return menuAccion(haTirado);
+                        } else System.out.println("No hay ninguna casilla que se llame así");
+                }
             case "fin":
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("partida")) return false;
                 break;
             case "pagar":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
-                if (pagando){
-                    pagarAv(jugadorActual,pagoPendiente,cobradorPendiente);
-                }
-                else System.out.println("No tienes nada que pagar :D");
+                if (pagando) {
+                    pagarAv(jugadorActual, pagoPendiente, cobradorPendiente);
+                } else System.out.println("No tienes nada que pagar :D");
                 break;
             case "acabar":
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("turno")) {
                     //if (((!haTirado && !jugadorActual.getMovAvanzadoActivado()) || (!jugadorActual.getMovAvanzadoActivado() && dado.areEqual()))&&!jugadorActual.getBancarrota()){
 
-                    if (puedeTirarOtraVez(haTirado) && !jugadorActual.getBancarrota()){ // SI PUEDE TIRAR OTRA VEZ, DEBE HACERLO. AVISAMOS.
+                    if (puedeTirarOtraVez(haTirado) && !jugadorActual.getBancarrota()) { // SI PUEDE TIRAR OTRA VEZ, DEBE HACERLO. AVISAMOS.
                         System.out.println("Tienes que tirar antes de terminar el turno");
                         break;
                     }
 
                     // Sin embargo, existe un caso en el que el jugador no puede tirar, pero tampoco puede acabar el turno. Lo tratamos:
-                    if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0 && jugadorActual.getAuxMovAvanzado()==1){
+                    if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 1) {
                         // (Si es tipo Pelota, el movimiento avanzado está activado y aún le quedan paradas por recorrer)
                         System.out.println("¡Aún te quedan paradas por recorrer!");
                         break;
                     }
 
-                    if (jugadorActual.getTipoMov()==1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                        if  (jugadorActual.getAuxMovAvanzado()<0){ // SI EL JUGADOR QUE ACABA EL TURNO ES UN COCHE CON MOTOR ROTO
-                            jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado()+1);
-                            if (jugadorActual.getAuxMovAvanzado()==0){
+                    if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                        if (jugadorActual.getAuxMovAvanzado() < 0) { // SI EL JUGADOR QUE ACABA EL TURNO ES UN COCHE CON MOTOR ROTO
+                            jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() + 1);
+                            if (jugadorActual.getAuxMovAvanzado() == 0) {
                                 jugadorActual.setAuxMovAvanzado(999);
                                 System.out.println("¡Motor reparado! En el siguiente turno podrás moverte.");
-                            }else
+                            } else
                                 System.out.printf("\nTurnos restantes para poder moverte: %d\n", -jugadorActual.getAuxMovAvanzado());
                             jugadorActual.setPuedeComprarPropiedades(true);
                             // jugadorActual.setAuxMovAvanzado(999);
@@ -906,10 +892,10 @@ public class Juego {
                             return true;
                         }
                     }
-                    if(pagando && !jugadorActual.getBancarrota()){
+                    if (pagando && !jugadorActual.getBancarrota()) {
                         System.out.println("Debes saldar tu deuda antes de acabar el turno, o declararte en bancarrota");
                     } else {
-                        if(!(jugadorActual.getTipoMov()==1 && jugadorActual.getMovAvanzadoActivado() && jugadorActual.getAuxMovAvanzado()<0)){
+                        if (!(jugadorActual.getTipoMov() == 1 && jugadorActual.getMovAvanzadoActivado() && jugadorActual.getAuxMovAvanzado() < 0)) {
                             jugadorActual.setAuxMovAvanzado(999);
                         }
                         jugadorActual.setPuedeComprarPropiedades(true);
@@ -925,29 +911,29 @@ public class Juego {
                     break;
                 }
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("parada")) {
-                    if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0 && jugadorActual.getAuxMovAvanzado()==0){
+                    if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 0) {
                         System.out.println("Ya has pasado por todas tus paradas.");
                         break;
-                    }
-                    else if(!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==1)){
+                    } else if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1)) {
                         System.out.println("¿Paradas? Bro think he pelota con movAvanzadoActivado");
                         break;
-                    }
-                    else if (!(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0)) tablero.imprimirTablero();
+                    } else if (!(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0))
+                        tablero.imprimirTablero();
                     //if (dado.getSuma()>4) return menuAccion(haTirado);
                     return haTirado;
                 }
                 break;
             case "bancarrota":
             case "Bancarrota":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, tristemente la partida se ha acabado para ti.");
                     break;
                 }
                 Scanner scanner = new Scanner(System.in);
                 System.out.print("¿Estás seguro de que quieres declararte en bancarrota?");
                 String respuesta = scanner.nextLine();
-                if (respuesta.equals("si")||respuesta.equals("Si")||respuesta.equals("SI")) jugadorActual.declararBancarrota(cobradorPendiente);
+                if (respuesta.equals("si") || respuesta.equals("Si") || respuesta.equals("SI"))
+                    jugadorActual.declararBancarrota(cobradorPendiente);
                 break;
             case "estadisticas":
             case "estadísticas":
@@ -964,10 +950,9 @@ public class Juego {
                             return menuAccion(haTirado);
                         }
                     }
-                }
-                else{
+                } else {
                     System.out.println("Casilla(s) mas rentables:  ");
-                    imprimirCasillas(casillaMasRentable(tablero.getCasillas()));
+                    imprimirCasillas(casillaMasRentable());
                     System.out.println("Grupo(s) mas rentables:    ");
                     imprimirGrupos(grupoMasRentable(tablero.getCasillas()));
                     System.out.println("Casilla(s) mas frecuentadas:   ");
@@ -985,53 +970,55 @@ public class Juego {
             case "edificar":
             case "construir":
                 boolean caidas = false;
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
-                caidas = contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas()))==2;
+                caidas = contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) == 2;
 
                 if (entradaPartida.length > 1)
-                    if(jugadorActual.getCasilla(tablero.getCasillas()) instanceof Solar)
-                    switch (entradaPartida[1]) {
-                    case "casa":
-                    case "Casa":
-                            ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(0, jugadorActual,caidas);
-                        break;
-                    case "hotel":
-                    case "Hotel":
-                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(1, jugadorActual,caidas);
-                        break;
-                    case "piscina":
-                    case "Piscina":
-                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(2, jugadorActual,caidas);
-                        break;
-                    case "pista":
-                    case "Pista":
-                        ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(3, jugadorActual,caidas);
-                        break;
-                    default:
-                        System.out.println("No existe este edificio. Prueba con casa, hotel, piscina o pista :)");
-                }
-                else
-                    System.out.println("No estás en un solar >: (");
+                    if (jugadorActual.getCasilla(tablero.getCasillas()) instanceof Solar)
+                        switch (entradaPartida[1]) {
+                            case "casa":
+                            case "Casa":
+                                ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(0, jugadorActual, caidas);
+                                break;
+                            case "hotel":
+                            case "Hotel":
+                                ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(1, jugadorActual, caidas);
+                                break;
+                            case "piscina":
+                            case "Piscina":
+                                ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(2, jugadorActual, caidas);
+                                break;
+                            case "pista":
+                            case "Pista":
+                                ((Solar) jugadorActual.getCasilla(tablero.getCasillas())).construir(3, jugadorActual, caidas);
+                                break;
+                            default:
+                                System.out.println("No existe este edificio. Prueba con casa, hotel, piscina o pista :)");
+                        }
+                    else
+                        System.out.println("No estás en un solar >: (");
                 break;
             case "vender":
             case "Vender":
-                if(jugadorActual.getBancarrota()){
+                if (jugadorActual.getBancarrota()) {
                     System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
                     break;
                 }
                 Edificio aux = null;
                 if (entradaPartida.length > 2) {
-                    String identificador = entradaPartida [1]+" "+entradaPartida[2];
-                    if (jugadorActual.getPropiedades()!=null) for (Propiedad cite: jugadorActual.getPropiedades()) if (cite instanceof Solar)
+                    String identificador = entradaPartida[1] + " " + entradaPartida[2];
+                    if (jugadorActual.getPropiedades() != null) for (Propiedad cite : jugadorActual.getPropiedades())
+                        if (cite instanceof Solar)
 
-                        if (((Solar)cite).getEdificios()!=null) for(Edificio eite: ((Solar)cite).getEdificios()){
-                            if (eite.getIdentificador().equals(identificador)) aux = eite;
-                        }
+                            if (((Solar) cite).getEdificios() != null)
+                                for (Edificio eite : ((Solar) cite).getEdificios()) {
+                                    if (eite.getIdentificador().equals(identificador)) aux = eite;
+                                }
 
-                    if (aux!=null) aux.getCasilla().venderEdificio(aux,jugadorActual);
+                    if (aux != null) aux.getCasilla().venderEdificio(aux, jugadorActual);
                     else System.out.println("Identificador inválido...");
                 } else System.out.println("Identificador inválido...");
                 break;
@@ -1040,11 +1027,13 @@ public class Juego {
         }
         return menuAccion(haTirado);
     }
-    private void pagarAv(Jugador pagador, int importe){
-        pagarAv(pagador,importe,banca);
+
+    private void pagarAv(Jugador pagador, int importe) {
+        pagarAv(pagador, importe, banca);
     }
-    private void pagarAv(Jugador pagador, int importe, Jugador cobrador){
-        while(!pagador.pagar(importe,cobrador) && !pagador.getBancarrota()){
+
+    private void pagarAv(Jugador pagador, int importe, Jugador cobrador) {
+        while (!pagador.pagar(importe, cobrador) && !pagador.getBancarrota()) {
             System.out.println("No tienes suficiente para pagar tu deuda, debes vender o hipotecar propiedades... ");
             cobradorPendiente = cobrador;
             pagoPendiente = importe;
@@ -1057,15 +1046,14 @@ public class Juego {
 
     /**
      * Gestión de dinero insuficiente. Llama a menú solo con opciones de vender, hipotecar e información...
-     *
      */
-    private void gestInsuf(){
+    private void gestInsuf() {
         pagando = true;
         menuAccion(true);
     }
 
     private void actualizarPropietarioCasillas() {
-        for (Casilla ite: tablero.getCasillas()) {
+        for (Casilla ite : tablero.getCasillas()) {
             if (ite instanceof Propiedad)
                 if (((Propiedad) ite).getPropietario() == null) ((Propiedad) ite).setPropietario(banca);
         }
@@ -1113,7 +1101,7 @@ public class Juego {
         tablero.getCasilla(0).setOcupantes(jugadores);
 
         // Inicializar el contador para cada jugador y cada casilla
-        for (Jugador jugador: jugadores) {
+        for (Jugador jugador : jugadores) {
             contadorCasillas.put(jugador, new HashMap<>());
             for (Casilla casilla : tablero.getCasillas()) {
                 contadorCasillas.get(jugador).put(casilla, 0);
@@ -1133,65 +1121,66 @@ public class Juego {
     private void actualizarPrecioCasillas() {
         for (Casilla ite : getTablero().getCasillas())
             if (ite instanceof Propiedad)
-            if (((Propiedad)ite).getPropietario().isBanca()) {
-                ((Propiedad)ite).setPrecio((int) (((Propiedad)ite).getPrecio() * 1.05));
-            }
+                if (((Propiedad) ite).getPropietario().isBanca()) {
+                    ((Propiedad) ite).setPrecio((int) (((Propiedad) ite).getPrecio() * 1.05));
+                }
     }
 
-    private ArrayList<Propiedad> casillaMasRentable(){
+    private ArrayList<Casilla> casillaMasRentable() {
         ArrayList<Casilla> casillas = tablero.getCasillas();
-        int maximo=0;
-        for(Casilla ite:casillas){
-            if (ite instanceof Propiedad)
-                if (((Propiedad)ite).getRentabilidad() > maximo)
-                    maximo = ((Propiedad)ite).getRentabilidad();
-            }
-
-        ArrayList<Propiedad> casillasConMaximo = new ArrayList<>();
+        int maximo = 0;
         for (Casilla ite : casillas) {
             if (ite instanceof Propiedad)
-                if (((Propiedad)ite).getRentabilidad() == maximo)
-                    casillasConMaximo.add((Propiedad)ite);
-            }
+                if (((Propiedad) ite).getRentabilidad() > maximo)
+                    maximo = ((Propiedad) ite).getRentabilidad();
+        }
+
+        ArrayList<Casilla> casillasConMaximo = new ArrayList<>();
+        for (Casilla ite : casillas) {
+            if (ite instanceof Propiedad)
+                if (((Propiedad) ite).getRentabilidad() == maximo)
+                    casillasConMaximo.add(ite);
+        }
         return casillasConMaximo;
     }
 
-    private void imprimirCasillas(ArrayList<Casilla> casillasEstad){
-        for(Casilla ite:casillasEstad)
+    private void imprimirCasillas(ArrayList<Casilla> casillasEstad) {
+        for (Casilla ite : casillasEstad)
             System.out.print(ite.getNombre() + ", ");
         System.out.println("\n");
     }
 
-    private void imprimirGrupos(ArrayList<Grupo> gruposEstad){
-        for(Grupo ite:gruposEstad)
+    private void imprimirGrupos(ArrayList<Grupo> gruposEstad) {
+        for (Grupo ite : gruposEstad)
             System.out.print(ite.getColor() + ", ");
         System.out.println("\n");
     }
 
-    private ArrayList<Grupo> grupoMasRentable(ArrayList<Casilla> tablero){
-        int maximo=0;
-        for(Casilla ite:tablero) {
+    private ArrayList<Grupo> grupoMasRentable(ArrayList<Casilla> tablero) {
+        int maximo = 0;
+        for (Casilla ite : tablero) {
             if (ite instanceof Solar) {
-                if (((Solar)ite).getGrupo().getRentabilidad() > maximo)
-                    maximo = ((Solar)ite).getGrupo().getRentabilidad();
+                if (((Solar) ite).getGrupo().getRentabilidad() > maximo)
+                    maximo = ((Solar) ite).getGrupo().getRentabilidad();
             }
         }
         ArrayList<Grupo> gruposConMaximo = new ArrayList<>();
         for (Casilla ite : tablero) {
-            if(ite instanceof Solar){
-                if(((Solar)ite).getGrupo().getRentabilidad()==maximo && !gruposConMaximo.contains(((Solar)ite).getGrupo()))
-                    gruposConMaximo.add(((Solar)ite).getGrupo());
+            if (ite instanceof Solar) {
+                if (((Solar) ite).getGrupo().getRentabilidad() == maximo && !gruposConMaximo.contains(((Solar) ite).getGrupo()))
+                    gruposConMaximo.add(((Solar) ite).getGrupo());
             }
         }
         return gruposConMaximo;
     }
 
-    private ArrayList<Casilla> casillaMasFrecuentada(ArrayList<Casilla> tablero){
-        int maximo=tablero.get(0).getVisitas();
-        for(Casilla ite:tablero){
+    private ArrayList<Casilla> casillaMasFrecuentada(ArrayList<Casilla> tablero) {
+        int maximo = tablero.get(0).getVisitas();
+        for (Casilla ite : tablero) {
             if (ite.getVisitas() > maximo) {
                 maximo = ite.getVisitas();
-            }}
+            }
+        }
         ArrayList<Casilla> casillasConMaximo = new ArrayList<>();
         for (Casilla ite : tablero) {
             if (ite.getVisitas() == maximo) {
@@ -1201,12 +1190,13 @@ public class Juego {
         return casillasConMaximo;
     }
 
-    private ArrayList<Jugador> jugadorMasVueltas(ArrayList<Jugador> jugadores){
-        int maximo=jugadores.get(0).getVueltas();
-        for(Jugador ite:jugadores){
+    private ArrayList<Jugador> jugadorMasVueltas(ArrayList<Jugador> jugadores) {
+        int maximo = jugadores.get(0).getVueltas();
+        for (Jugador ite : jugadores) {
             if (ite.getVueltas() > maximo) {
                 maximo = ite.getVueltas();
-            }}
+            }
+        }
         ArrayList<Jugador> jugadoresConMaximo = new ArrayList<>();
         for (Jugador ite : jugadores) {
             if (ite.getVueltas() == maximo) {
@@ -1216,12 +1206,13 @@ public class Juego {
         return jugadoresConMaximo;
     }
 
-    private ArrayList<Jugador>  jugadorMasDados(ArrayList<Jugador> jugadores){
-        int maximo=jugadores.get(0).getVecesDados();
-        for(Jugador ite:jugadores){
+    private ArrayList<Jugador> jugadorMasDados(ArrayList<Jugador> jugadores) {
+        int maximo = jugadores.get(0).getVecesDados();
+        for (Jugador ite : jugadores) {
             if (ite.getVecesDados() > maximo) {
                 maximo = ite.getVecesDados();
-            }}
+            }
+        }
         ArrayList<Jugador> jugadoresConMaximo = new ArrayList<>();
         for (Jugador ite : jugadores) {
             if (ite.getVecesDados() == maximo) {
@@ -1231,12 +1222,13 @@ public class Juego {
         return jugadoresConMaximo;
     }
 
-    private ArrayList<Jugador> jugadorEnCabeza(ArrayList<Jugador> jugadores){
-        int maximo=jugadores.get(0).getFortuna();
-        for(Jugador ite:jugadores){
+    private ArrayList<Jugador> jugadorEnCabeza(ArrayList<Jugador> jugadores) {
+        int maximo = jugadores.get(0).getFortuna();
+        for (Jugador ite : jugadores) {
             if (ite.getFortuna() > maximo) {
                 maximo = ite.getFortuna();
-            }}
+            }
+        }
         ArrayList<Jugador> jugadoresConMaximo = new ArrayList<>();
         for (Jugador ite : jugadores) {
             if (ite.getFortuna() == maximo) {
@@ -1245,35 +1237,33 @@ public class Juego {
         }
         return jugadoresConMaximo;
     }
-    private void imprimirJugadores(ArrayList<Jugador> jugadoresEstad){
-        for(Jugador ite:jugadoresEstad)
+
+    private void imprimirJugadores(ArrayList<Jugador> jugadoresEstad) {
+        for (Jugador ite : jugadoresEstad)
             System.out.print(ite.getNombre() + ", ");
         System.out.println("\n");
     }
 
-    private boolean puedeTirarOtraVez(boolean haTirado){
-        if(jugadorActual.getMovAvanzadoActivado()){ // SI ESTÁ EL MOVIMIENTO AVANZADO ACTIVADO, DISTINGUIMOS ENTRE "PELOTA" Y "COCHE"
-            if(jugadorActual.getTipoMov() == 0){ // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
-                if(jugadorActual.getAuxMovAvanzado()==1){ // Si le quedan paradas sin recorrer, no puede tirar
+    private boolean puedeTirarOtraVez(boolean haTirado) {
+        if (jugadorActual.getMovAvanzadoActivado()) { // SI ESTÁ EL MOVIMIENTO AVANZADO ACTIVADO, DISTINGUIMOS ENTRE "PELOTA" Y "COCHE"
+            if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                if (jugadorActual.getAuxMovAvanzado() == 1) { // Si le quedan paradas sin recorrer, no puede tirar
                     return false;
                 }
-                if(jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()){ // Si no le quedan paradas y tampoco sacó dobles, no puede tirar
+                if (jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si no le quedan paradas y tampoco sacó dobles, no puede tirar
                     return false;
                 }
             }
 
-            if(jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                if(jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()){ // Si se le acabaron las tiradas extra y no sacó dobles en la anterior, no puede tirar
+            if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                if (jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si se le acabaron las tiradas extra y no sacó dobles en la anterior, no puede tirar
                     return false;
                 }
-                if (jugadorActual.getTipoMov()==1 && jugadorActual.getAuxMovAvanzado()<0){ // Motor roto
-                    return false;
-                }
+                // Motor roto
+                return jugadorActual.getTipoMov() != 1 || jugadorActual.getAuxMovAvanzado() >= 0;
             }
-        }else{ // SI NO ESTÁ ACTIVADO EL MOV AVANZADO...
-            if(haTirado && !dado.areEqual()){
-                return false;
-            }
+        } else { // SI NO ESTÁ ACTIVADO EL MOV AVANZADO...
+            return !haTirado || dado.areEqual();
         }
         return true; // En el resto de los casos, el jugador SÍ puede tirar.
     }
