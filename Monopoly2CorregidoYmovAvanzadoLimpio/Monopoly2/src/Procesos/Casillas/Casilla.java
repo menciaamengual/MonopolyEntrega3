@@ -80,6 +80,7 @@ public abstract class Casilla{
         return nombre;
     }
 
+    //Visitas
     public void setVisitas(int visitas) {
         this.visitas = visitas;
     }

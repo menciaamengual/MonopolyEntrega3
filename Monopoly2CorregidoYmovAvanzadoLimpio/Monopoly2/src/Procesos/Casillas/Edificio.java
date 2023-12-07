@@ -5,40 +5,17 @@ import Procesos.Casillas.Casilla;
 import Procesos.Jugador;
 import Procesos.Tablero;
 
-public class Edificio {
-    int tipo; //0-3
-    String identificador;
-    Solar casilla;
-    int precio;
-    Jugador propietario;
+public abstract class Edificio {
+    private String identificador;
+    private int precio;
+    private Solar casilla;
+    private Jugador propietario;
 
     /**
      *
-     * @param tipo
-     * @param precioC precio de la casilla sobre la que se construye
      */
-    public Edificio(int tipo,int precioC) {
-        this.tipo = tipo;
+    public Edificio() { //Puede que se pueda meter ya aquí la casilla
         casilla = null;
-        switch(tipo){
-            case 0:
-                precio = (int) (precioC*0.6);
-                identificador = "Casa "+ Tablero.getCcasa();
-                break;
-            case 1:
-                precio = (int) (precioC*0.6);
-                identificador = "Hotel "+Tablero.getChotel();
-                break;
-            case 2:
-                precio = (int) (precioC*0.4);
-                identificador = "Piscina "+Tablero.getCpiscina();
-                break;
-            case 3:
-                precio = (int) (precioC*1.25);
-                identificador = "Pista "+Tablero.getCdeporte();
-                break;
-        }
-
     }
 
     public void setCasilla(Solar casilla) {
@@ -54,15 +31,24 @@ public class Edificio {
         return identificador;
     }
 
-    public int getTipo() {
-        return tipo;
+    public void setIdentificador(String identificador) {
+        this.identificador = identificador;
+    }
+
+    public void setPropietario(Jugador propietario) {
+        this.propietario = propietario;
     }
 
     public String toString(){
         return identificador;
     }
 
+    public void setPrecio(int precio) {
+        this.precio = precio;
+    }
+
     public int getPrecio() {
         return precio;
     }
 }
+

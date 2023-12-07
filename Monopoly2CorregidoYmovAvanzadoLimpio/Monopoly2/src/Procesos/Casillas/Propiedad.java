@@ -6,19 +6,34 @@ public abstract class Propiedad extends Casilla {
     private Jugador propietario;
     private boolean hipotecado;
     private int precio; //Precio de compra a la banca (precio básico)
-    private int hipoteca;
     private int rentabilidad; //Dinero generado por la propiedad hasta el momento
 
     //Propietario
-    public void setPropietario(Jugador propietario) {
+
+    public Propiedad(int posicion, String nombre, Jugador propietario){
+        super(posicion,nombre);
         this.propietario = propietario;
+        precio = 0;
+        rentabilidad = 0;
+        int hipoteca = 0;
+        hipotecado = false;
+    }
+
+    /**
+     * Settea la propiedad y actualiza las listas de propiedad de los propietarios de la propiedad.
+     * @param propietario al que se traslada la propiedad
+     */
+    public void setPropietario(Jugador propietario) {
+        this.propietario.removePropiedad(this);
+        this.propietario = propietario;
+        propietario.addPropiedad(this);
     }
 
     public Jugador getPropietario() {
         return propietario;
     }
-
     //Precio
+
     public void setPrecio(int precio){
         this.precio = precio;
     }
@@ -27,15 +42,6 @@ public abstract class Propiedad extends Casilla {
         return precio;
     }
 
-
-    public Propiedad(int posicion, String nombre, Jugador propietario){
-        super(posicion,nombre);
-        this.propietario = propietario;
-        precio = 0;
-        rentabilidad = 0;
-        hipoteca = 0;
-        hipotecado = false;
-    }
     //Hipoteca
 
     /**
@@ -117,7 +123,7 @@ public abstract class Propiedad extends Casilla {
         return "{\nnombre: " + getNombre() +"\n"+
                 "tipo: "+ getClass() +" \n" +
                 "valor: "+ precio +" \n" +
-                "Propietario: " + getPropietario() +"\n" +
+                "Propietario: " + getPropietario().getNombre() +"\n" +
                 "}\n";
     }
     public void accionCasilla(Jugador jugador){

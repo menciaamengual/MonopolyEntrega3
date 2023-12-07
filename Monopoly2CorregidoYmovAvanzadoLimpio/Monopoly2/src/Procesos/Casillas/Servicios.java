@@ -8,6 +8,7 @@ public class Servicios extends Propiedad {
     public Servicios(int posicion, String nombre, Jugador propietario, int pSalida) {
         super(posicion, nombre, propietario);
         Servicios.alquilerBase = pSalida/200;
+        setPrecio((int) (pSalida*0.75));
     }
     public int calcularAlquiler(Dado dado){
         if (getPropietario().getNServicios() == 1) return dado.getSuma()*alquilerBase*4;

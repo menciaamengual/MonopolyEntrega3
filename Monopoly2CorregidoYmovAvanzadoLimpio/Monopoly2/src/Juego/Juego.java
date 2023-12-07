@@ -191,10 +191,10 @@ public class Juego {
                 int contC = 0, contH = 0, contP = 0, contD = 0;
                 for (Casilla ite : jugadorActual.getPropiedades()) {
                     if (ite instanceof Solar) for (Edificio cite : ((Solar) ite).getEdificios()) {
-                        if (cite.getTipo() == 0) contC++;
-                        if (cite.getTipo() == 1) contH++;
-                        if (cite.getTipo() == 2) contP++;
-                        if (cite.getTipo() == 3) contD++;
+                        if (cite instanceof Casa) contC++;
+                        if (cite instanceof Hotel) contH++;
+                        if (cite instanceof Piscina) contP++;
+                        if (cite instanceof Pista) contD++;
                     }
                 }
 
@@ -391,7 +391,7 @@ public class Juego {
      * Función de compra de la casilla, con comprobación de si el jugadorActual tienen suficiente dinero
      * Realiza la transacción correspondiente entre el jugador y la banca, y mueve la propiedad de la Procesos.Casilla, y del grupo en caso de que corresponda
      */
-    public void comprarCasilla() { //todo garantizar que se añade a propiedades en Jugador
+    public void comprarCasilla() { //todo garantizar que se añade a propie
         Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
         if (!(casillac instanceof Propiedad)) { //RARO
             System.out.println("No puedes comprar esta casilla");

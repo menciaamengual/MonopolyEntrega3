@@ -26,22 +26,16 @@ public final class Solar extends Propiedad {
     //Funciones generales
     public final int calcularAlquiler() {
         int alq = alquilerBase;
+        int ncasas = 0;
         if (!edificios.isEmpty()) { //Calculo de número de edificios
-            int ncasas = 0;
             for (Edificio ite : edificios) {
-                switch (ite.getTipo()) {
-                    case 0:
+                if (ite instanceof Casa)
                         ncasas++;
-                        break;
-                    case 1:
+                else if (ite instanceof Hotel)
                         alq += alquilerBase * 70;
-                        break;
-                    case 2:
-                    case 3:
+                else if (ite instanceof Piscina || ite instanceof Pista)
                         alq += alquilerBase * 25;
-                        break;
                 }
-            }
             switch (ncasas) { //Considerams la adición de los edificios
                 case 1:
                     alq += 5 * alquilerBase;
@@ -102,7 +96,13 @@ public final class Solar extends Propiedad {
         }
 
         int countc = 0, counth = 0, countp = 0, countd = 0, countgh = 0, countgc = 0; //Contador de casas por casilla, hoteles por grupo y casas por grupo
-        Edificio edificio = new Edificio(tipo, getPrecio());
+        Edificio edificio;
+        switch (tipo){
+            case 1: edificio = new Hotel (getPrecio()); break;
+            case 2: edificio = new Piscina (getPrecio()); break;
+            case 3: edificio = new Pista (getPrecio()); break;
+            default: edificio = new Casa (getPrecio());
+        }
 
         if (jugador.getDinero() < edificio.getPrecio()) { //Comprobación dinero
             System.out.println("Dinero insuficiente, inténtalo otra vez cuando tengas más dinero");
@@ -110,15 +110,15 @@ public final class Solar extends Propiedad {
         }
 
         for (Edificio ite : edificios) {
-            if (ite.getTipo() == 0) countc++;
-            if (ite.getTipo() == 1) counth++;
-            if (ite.getTipo() == 2) countp++;
-            if (ite.getTipo() == 3) countd++;
+            if (ite instanceof Casa) countc++;
+            if (ite instanceof Hotel) counth++;
+            if (ite instanceof Piscina) countp++;
+            if (ite instanceof Pista) countd++;
         }
         for (Solar cite : grupo.getCasillas()) { //A solucionar...
             for (Edificio ite : cite.getEdificios()) {
-                if (ite.getTipo() == 1) countgh++;
-                if (ite.getTipo() == 0) countgc++;
+                if (ite instanceof Hotel) countgh++;
+                if (ite instanceof Casa) countgc++;
             }
         }
         switch (tipo) {
@@ -144,14 +144,9 @@ public final class Solar extends Propiedad {
                     System.out.println("No puedes construir más hoteles en esta propiedad");
                 else {
                     System.out.println("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
-                    System.out.println("Pagas " + edificio.getPrecio() + " por construir");
-                    edificios.add(edificio);
-                    jugador.pagar(edificio.getPrecio());
-                    jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido() + getPrecio());
-                    edificio.setCasilla(this);
+                    construiccionInter(jugador, edificio);
                     Tablero.addChotel();
-                    edificios.removeIf(ite -> ite.getTipo() == 0);
+                    edificios.removeIf(ite -> ite instanceof Casa);
                 }
                 break;
             case 2:
@@ -160,12 +155,7 @@ public final class Solar extends Propiedad {
                     System.out.println("Necesitas tener al menos 2 casas y 1 hotel para construir una piscina en esta propiedad");
                 else {
                     System.out.println("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
-                    System.out.println("Pagas " + edificio.getPrecio() + " por construir");
-                    edificios.add(edificio);
-                    jugador.pagar(edificio.getPrecio());
-                    jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido() + getPrecio());
-                    edificio.setCasilla(this);
+                    construiccionInter(jugador, edificio);
                     Tablero.addCpiscina();
                 }
                 break;
@@ -174,17 +164,21 @@ public final class Solar extends Propiedad {
                 else if (counth < 2)
                     System.out.println("Necesitas tener al menos 2 hoteles para construir una piscina en esta propiedad");
                 else {
-                    System.out.println("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
-                    System.out.println("Pagas " + edificio.getPrecio() + " por construir");
-                    edificios.add(edificio);
-                    jugador.pagar(edificio.getPrecio());
-                    jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
-                    jugador.setDineroInvertido(jugador.getDineroInvertido() + getPrecio());
-                    edificio.setCasilla(this);
+                    System.out.println("Enhorabuena, estás colaborando mucho con la gentrificación de tu ciudad");
+                    construiccionInter(jugador, edificio);
                     Tablero.addCdeporte();
                 }
                 break;
         }
+    }
+
+    private void construiccionInter(Jugador jugador, Edificio edificio) {
+        System.out.println("Pagas " + edificio.getPrecio() + " por construir");
+        edificios.add(edificio);
+        jugador.pagar(edificio.getPrecio());
+        jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
+        jugador.setDineroInvertido(jugador.getDineroInvertido() + getPrecio());
+        edificio.setCasilla(this);
     }
 
     /**
@@ -234,7 +228,7 @@ public final class Solar extends Propiedad {
     public void accionCasilla(Jugador jugador) {
         if (!getPropietario().equals(jugador) && !getPropietario().isBanca() && !getHipotecado()) {
             jugador.pagar(calcularAlquiler(), getPropietario());
-            setRentabilidad(getRentabilidad() + calcularAlquiler()); //edificios??
+            setRentabilidad(getRentabilidad() + calcularAlquiler());
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());
             grupo.setRentabilidad(grupo.getRentabilidad() + calcularAlquiler());
@@ -244,7 +238,7 @@ public final class Solar extends Propiedad {
         } else if (getPropietario().isBanca()) {
             System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
         } else if (getPropietario().equals(jugador)) {
-            System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
+            System.out.println("Has caído en una casilla de tu propiedad, disfruta de tu estancia");
         }
     }
 
@@ -261,7 +255,7 @@ public final class Solar extends Propiedad {
                 "ALQUILER ACTUAL: " + calcularAlquiler() + "$\n" +
                 "   -Alquiler Básico: " + alquilerBase + "$ \n" +
                 "   -Alquiler con tod el grupo: " + alquilerBase * 2 + "$ \n" +
-                //Podemos meter aquí alquiler con construcones (igual no todas las combinaciones, pero un poquito).
+                //Podemos meter aquí alquiler con edificios (igual no todas las combinaciones, pero un poquito).
                 "Puedes hipotecar esta casilla por " + getPrecio() / 2 + "$\n" +
 
                 //"Ocupantes: "+ ocupantes +" \n" +
