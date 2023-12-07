@@ -168,7 +168,7 @@ public class Tablero {
             stab.append("\n");
         }
         stab.append(casillas.get(11).toString());
-        stab.append(String.format("\u001B[4m%"+(Casilla.getLonMaxNombre()+6+3)*9+"s\u001B[0m"," "));//
+        stab.append(String.format("\u001B[4m%"+(Casilla.lonMaxNombre+6+3)*9+"s\u001B[0m"," "));//
         stab.append(casillas.get(31+8).toString());
         stab.append("\n");
 
@@ -220,7 +220,7 @@ public class Tablero {
     public int precioTotal() {
         int c = 0;
         for (Casilla casilla:casillas){
-            c+=casilla.getPrecio();
+            if (casilla instanceof Propiedad) c+=((Propiedad)casilla).getPrecio();
         }
         return c;
     }

@@ -2,10 +2,6 @@ package Juego;
 //MONOPOLY V2
 //Mateito, Cese y Mencía
 
-import java.beans.PersistenceDelegate;
-import java.util.Scanner;
-import java.util.*;
-import Procesos.*;
 
 public class Main {
     public static void main(String[] args) {

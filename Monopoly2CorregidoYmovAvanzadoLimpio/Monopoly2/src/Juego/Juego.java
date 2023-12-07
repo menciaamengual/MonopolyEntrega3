@@ -140,8 +140,7 @@ public class Juego {
                         // Si es par, no se hace nada.
                     }
                     return;
-                }
-                else {
+                } else {
                     int aux = jugadorActual.getPosicion(); // guardamos la posición para comprobar paridades
                     for (int i = avance; i > 0; i--) {
                         avanzarCasillas(-1, false);
@@ -191,7 +190,7 @@ public class Juego {
             case 0:
                 int contC = 0, contH = 0, contP = 0, contD = 0;
                 for (Casilla ite : jugadorActual.getPropiedades()) {
-                    if (ite instanceof Solar) for (Edificio cite : ((Solar)ite).getEdificios()) {
+                    if (ite instanceof Solar) for (Edificio cite : ((Solar) ite).getEdificios()) {
                         if (cite.getTipo() == 0) contC++;
                         if (cite.getTipo() == 1) contH++;
                         if (cite.getTipo() == 2) contP++;
@@ -234,53 +233,39 @@ public class Juego {
                 break;
 
             case 4:
-                int alquilersuerte = tablero.getCasilla(jugadorActual.getPosicion()).calcularAlquiler(dado) * 2;
-                if (jugadorActual.getPosicion() == 7) {
-                    jugadorActual.setPosicion(15, tablero.getCasillas());
-                    if (!tablero.getCasilla(15).getPropietario().equals(jugadorActual) && !tablero.getCasilla(15).getPropietario().equals(banca) && !tablero.getCasilla(15).getHipotecado()) {
-                        tablero.imprimirTablero();
-                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(15).getPropietario());
-                        tablero.getCasilla(15).setRentabilidad(tablero.getCasilla(15).getRentabilidad() + alquilersuerte);
-                        jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
-                        tablero.getCasilla(15).getPropietario().setCobroDeAlquileres(tablero.getCasilla(15).getPropietario().getCobroDeAlquileres() + alquilersuerte);
-                        System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(15).getNombre());
-                    } else if (tablero.getCasilla(15).getHipotecado()) {
-                        System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
-                    }
+                int pTCercano = 5;
+                switch (jugadorActual.getPosicion()){
+                    case 7:
+                        pTCercano = 15;
+                        break;
+                    case 22:
+                        pTCercano = 25;
+                        break;
+                    case 36:
+                        //pTCercano a 5 por defecto
+                        System.out.println("Has pasado por la casilla de salida, cobras" + pSalida);
+                        jugadorActual.addDinero(pSalida);
+                        jugadorActual.setPasarPorCasillaDeSalida(jugadorActual.getPasarPorCasillaDeSalida() + pSalida);
+                        addVuelta(jugadorActual);
+                        break;
                 }
-                if (jugadorActual.getPosicion() == 22) {
-                    jugadorActual.setPosicion(25, tablero.getCasillas());
-                    if (!tablero.getCasilla(25).getPropietario().equals(jugadorActual) && !tablero.getCasilla(25).getPropietario().equals(banca) && !tablero.getCasilla(25).getHipotecado()) {
-                        tablero.imprimirTablero();
-                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(25).getPropietario());
-                        tablero.getCasilla(25).setRentabilidad(tablero.getCasilla(25).getRentabilidad() + alquilersuerte);
-                        jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
-                        tablero.getCasilla(25).getPropietario().setCobroDeAlquileres(tablero.getCasilla(25).getPropietario().getCobroDeAlquileres() + alquilersuerte);
-                        System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(25).getNombre());
-                    } else if (tablero.getCasilla(25).getHipotecado()) {
-                        System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
-                    }
+                jugadorActual.setPosicion(pTCercano, tablero.getCasillas());
+                tablero.imprimirTablero();
+                Propiedad tCercano;
+                if (tablero.getCasilla(pTCercano) instanceof Transporte)  tCercano = (Propiedad) tablero.getCasilla(pTCercano);
+                else break;
 
-                }
-                if (jugadorActual.getPosicion() == 36) {
-                    jugadorActual.setPosicion(5, tablero.getCasillas());
-                    tablero.imprimirTablero();
-                    System.out.println("Has pasado por la casilla de salida, cobras" + pSalida);
-                    jugadorActual.addDinero(pSalida);
-                    jugadorActual.setPasarPorCasillaDeSalida(jugadorActual.getPasarPorCasillaDeSalida() + pSalida);
-                    addVuelta(jugadorActual);
-                    if (!tablero.getCasilla(5).getPropietario().equals(jugadorActual) && !tablero.getCasilla(5).getPropietario().equals(banca) && !tablero.getCasilla(5).getHipotecado()) {
-                        pagarAv(jugadorActual, alquilersuerte, tablero.getCasilla(5).getPropietario());
-                        tablero.getCasilla(5).setRentabilidad(tablero.getCasilla(5).getRentabilidad() + alquilersuerte);
-                        jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
-                        tablero.getCasilla(5).getPropietario().setCobroDeAlquileres(tablero.getCasilla(5).getPropietario().getCobroDeAlquileres() + alquilersuerte);
-                        System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tablero.getCasilla(5).getNombre());
-                    } else if (tablero.getCasilla(5).getHipotecado()) {
-                        System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
-                    }
-                }
-                break;
+                int alquilersuerte = ((Transporte)tCercano).calcularAlquiler() * 2;
 
+                if (!tCercano.getPropietario().equals(jugadorActual) && !tCercano.getPropietario().equals(banca) && !tCercano.getHipotecado()) {
+                    pagarAv(jugadorActual, alquilersuerte, tCercano.getPropietario());
+                    tCercano.setRentabilidad(tCercano.getRentabilidad() + alquilersuerte);
+                    jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + alquilersuerte);
+                    tCercano.getPropietario().setCobroDeAlquileres(tCercano.getPropietario().getCobroDeAlquileres() + alquilersuerte);
+                    System.out.println("Pagas " + alquilersuerte + "$ por caer en " + tCercano.getNombre());
+                } else if (tCercano.getHipotecado()) {
+                    System.out.println("La casilla de transporte esta hipotecada... No pagas alquiler :)");
+                }
             case 5:
                 jugadorActual.addDinero(2000);
                 jugadorActual.setPremiosInversionesOBote(jugadorActual.getPremiosInversionesOBote() + 2000);
@@ -334,79 +319,37 @@ public class Juego {
     }
 
     /**
-     * Ejecuta la acción de la casilla. Cobra alquileres, impuestos, etc. y te manda a la carcel si corresponde
-     * Y lo avisa por pantalla
-     *
-     * @param
+     * Llamamos a funciones internas para todos los tipos de casilla menos para cartas
+     * En este caso necesitábamos acceder a demasiados métodos y atributos de juego para que tuviese sentido
      */
-    public void accionCasilla() { //Reemplazar por llamadas puntuales de la casilla - casilla.accionCasilla();
+    public void accionCasilla() {
         contadorCasillas.get(jugadorActual).put(jugadorActual.getCasilla(tablero.getCasillas()), contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) + 1);
-        //System.out.println("Caída "+contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())));
-        int t = jugadorActual.getCasilla(tablero.getCasillas()).getTipo();
         Casilla casilla = jugadorActual.getCasilla(tablero.getCasillas());
-        Grupo grupo = casilla.getGrupo();
-        carta = new Carta(jugadorActual.getPosicion());
-        if (t != 4 && t != 7) { //La casilla de carcel, parking gratuido y salida no hacen nada. El "salario" de salida está implementado con el movimiento
-            switch (t) {
-                case 0:
-                case 1:
-                case 2:
-                    if (!casilla.getPropietario().equals(jugadorActual) && !casilla.getPropietario().equals(banca) && !casilla.getHipotecado()) {
-                        pagarAv(jugadorActual, casilla.calcularAlquiler(dado), casilla.getPropietario());
-                        casilla.setRentabilidad(casilla.getRentabilidad() + casilla.calcularAlquiler(dado)); //edificios??
-                        jugadorActual.setPagoDeAlquileres(jugadorActual.getPagoDeAlquileres() + casilla.calcularAlquiler(dado));
-                        casilla.getPropietario().setCobroDeAlquileres(casilla.getPropietario().getCobroDeAlquileres() + casilla.calcularAlquiler(dado));
-                        if (t == 0)
-                            grupo.setRentabilidad(grupo.getRentabilidad() + casilla.calcularAlquiler(dado));
-                        System.out.println("Pagas " + casilla.calcularAlquiler(dado) + "$ por caer en " + casilla.getNombre());
-                    } else if (casilla.getHipotecado()) {
-                        System.out.println("Casilla hipotecada... No pagas alquiler :)");
-                    } else if (casilla.getPropietario().equals(banca)) {
-                        System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
-                    } else if (casilla.getPropietario().equals(jugadorActual)) {
-                        System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
-                    }
-                    break;
-                case 3:
-                    carta.barajar();
-                    int indice;
-                    String entradaString;
-                    do {
-                        System.out.println("Elige una carta (introduciendo un numero del 1 al 6)");
-                        Scanner entrada = new Scanner(System.in);
-                        entradaString = entrada.nextLine();
-                    } while (!entradaString.equals("1") && !entradaString.equals("2") && !entradaString.equals("3") && !entradaString.equals("4") && !entradaString.equals("5") && !entradaString.equals("6"));
+        if (casilla instanceof Solar) ((Solar) casilla).accionCasilla(jugadorActual);
+        else if (casilla instanceof Transporte) ((Transporte) casilla).accionCasilla(jugadorActual);
+        else if (casilla instanceof Servicios) ((Servicios) casilla).accionCasilla(jugadorActual,dado);
+        else if (casilla instanceof Impuesto) ((Impuesto) casilla).accionCasilla(jugadorActual);
+        else if (casilla instanceof ParkingGratuito) ((ParkingGratuito) casilla).accionCasilla(jugadorActual);
+        else if (casilla instanceof VasALaCarcel) ((VasALaCarcel) casilla).accionCasilla(jugadorActual,tablero.getCasillas(),dado);
+        else if (casilla instanceof Salida) ((Salida) casilla).accionCasilla();
+        else if (casilla instanceof Carcel) ((Carcel) casilla).accionCasilla(jugadorActual);
 
-                    indice = Integer.parseInt(entradaString);
-
-                    int numCarta = (carta.getcartas().get(indice - 1));
-                    if (carta.getTipo() == 0)
-                        accionSuerte(numCarta);
-                    if (carta.getTipo() == 1)
-                        accionCajaC(numCarta);
-                    break;
-
-                case 5: //parking"
-                    jugadorActual.addDinero(casilla.getAlquilerBase());
-                    System.out.println("Has caído en el Parking! cobras " + casilla.getAlquilerBase() + "$.");
-                    jugadorActual.setPremiosInversionesOBote(jugadorActual.getPremiosInversionesOBote() + casilla.getAlquilerBase());
-                    casilla.setAlquilerBase(0);
-                    break;
-                case 6: //Impuesto
-                    pagarAv(jugadorActual, casilla.calcularAlquiler(dado), banca);
-                    tablero.getCasilla(20).setAlquilerBase(tablero.getCasilla(20).getAlquilerBase() + casilla.calcularAlquiler(dado));
-                    System.out.println("Has caído en la casilla impuestos, debes pagar " + casilla.calcularAlquiler(dado) + "$");
-                    jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + casilla.calcularAlquiler(dado));
-                    break;
-                case 8:
-                    jugadorActual.enviarCarcel(tablero.getCasillas()); //Podemos probar a cambiar esto por las funciones correspondientes y ya
-                    dado.tirarDados(1, 2); //Ponemos valores arbitrarios (pero distintos), así NUNCA entras en la cárcel con dobles y se acaba el turno
-                    System.out.println("A la cárcel!");
-                    jugadorActual.setVecesEnLaCarcel(jugadorActual.getVecesEnLaCarcel() + 1);
-                    break;
-            }
-
-
+        else if (casilla instanceof Comunidad || casilla instanceof Suerte) {
+            carta = new Carta(jugadorActual.getPosicion());
+            carta.barajar();
+            int indice;
+            String entradaString;
+            do {
+                System.out.println("Elige una carta (introduciendo un numero del 1 al 6)");
+                Scanner entrada = new Scanner(System.in);
+                entradaString = entrada.nextLine();
+            } while (!entradaString.equals("1") && !entradaString.equals("2") && !entradaString.equals("3") && !entradaString.equals("4") && !entradaString.equals("5") && !entradaString.equals("6"));
+            indice = Integer.parseInt(entradaString);
+            int numCarta = (carta.getcartas().get(indice - 1));
+            if (carta.getTipo() == 0)
+                accionSuerte(numCarta);
+            if (carta.getTipo() == 1)
+                accionCajaC(numCarta);
         }
     }
 
@@ -450,10 +393,11 @@ public class Juego {
      */
     public void comprarCasilla() {
         Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
-        if (!(casillac instanceof Propiedad casilla)){ //RARO
+        if (!(casillac instanceof Propiedad)) { //RARO
             System.out.println("No puedes comprar esta casilla");
             return;
         }
+        Propiedad casilla = (Propiedad) casillac;
         if (jugadorActual.getDinero() >= casilla.getPrecio()) {
             casilla.getPropietario().addDinero(casilla.getPrecio());
             casilla.setPropietario(jugadorActual);
@@ -530,9 +474,9 @@ public class Juego {
                         if (entradaPartida.length > 2) {
                             for (Grupo ite : tablero.getGrupos()) {
                                 if (ite.getColor().equals(entradaPartida[2])) {
-                                    for (Casilla cite : ite.getCasillas()) {
-                                        if (cite instanceof Solar)
-                                            for (Edificio eite : ((Solar)cite).getEdificios())
+                                    for (Solar cite : ite.getCasillas()) {
+                                        if (cite != null)
+                                            for (Edificio eite : cite.getEdificios())
                                                 System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
                                     }
                                     return menuAccion(haTirado);
@@ -541,8 +485,9 @@ public class Juego {
                             System.out.println("No se reconoce el grupo/color");
                         } else for (Casilla cite : tablero.getCasillas()) {
                             if (cite instanceof Solar)
-                                if (((Solar) cite).getEdificios() != null) for (Edificio eite : ((Solar)cite).getEdificios())
-                                    System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
+                                if (((Solar) cite).getEdificios() != null)
+                                    for (Edificio eite : ((Solar) cite).getEdificios())
+                                        System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
                         }
                 }
                 break;

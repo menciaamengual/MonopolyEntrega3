@@ -10,7 +10,9 @@ public final class Impuesto extends Casilla {
     }
 
     public void accionCasilla(Jugador jugador){
+        System.out.println("Has caído en la casilla impuestos, debes pagar " + valor + "$");
         if (jugador.pagar(valor))
             ParkingGratuito.addDineroAcumulado(valor);
+        jugador.setPagoTasasEImpuestos(jugador.getPagoTasasEImpuestos() + valor);
     }
 }

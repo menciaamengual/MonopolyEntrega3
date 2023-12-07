@@ -3,15 +3,13 @@ import java.util.*;
 public class Carta {
     //Atributos
     private int tipo; //0-1. 0.Suerte 1. Comunidad
-    private int posicion;
-    private List<Integer> cartas = new ArrayList<>(6);
-    private List<String> cartasSuerte = new ArrayList<>(6);
-    private List<String> cartasCajaC = new ArrayList<>(6);
+    private final List<Integer> cartas = new ArrayList<>(6);
+    private final List<String> cartasSuerte = new ArrayList<>(6);
+    private final List<String> cartasCajaC = new ArrayList<>(6);
 
 
     //CONTRUCTORES
     public Carta(int posicion){
-        this.posicion=posicion;
         if (posicion==7 || posicion ==22 || posicion ==36)
             this.tipo=0;
         if (posicion==2 || posicion ==17 || posicion==33)

@@ -105,6 +105,10 @@ public abstract class Propiedad extends Casilla {
     //Estadísticas
     //Aquí apáñate tu @menciamengual
 
+    public void setRentabilidad(int rentabilidad) {
+        this.rentabilidad = rentabilidad;
+    }
+
     public int getRentabilidad() {
         return rentabilidad;
     }
@@ -115,6 +119,25 @@ public abstract class Propiedad extends Casilla {
                 "valor: "+ precio +" \n" +
                 "Propietario: " + getPropietario() +"\n" +
                 "}\n";
+    }
+    public void accionCasilla(Jugador jugador){
+        if (!propietario.equals(jugador) && !propietario.isBanca() && !hipotecado) {
+            jugador.pagar(calcularAlquiler(), propietario);
+            setRentabilidad(rentabilidad + calcularAlquiler()); //edificios??
+            jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
+            getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());
+            System.out.println("Pagas " + calcularAlquiler() + "$ por caer en " + getNombre());
+        } else if (getHipotecado()) {
+            System.out.println("Casilla hipotecada... No pagas alquiler :)");
+        } else if (propietario.isBanca()) {
+            System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
+        } else if (propietario.equals(jugador)) {
+            System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
+        }
+    }
+
+    private int calcularAlquiler() {
+        return 0;
     }
 }
 

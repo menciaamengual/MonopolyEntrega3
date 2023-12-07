@@ -377,18 +377,16 @@ public class Jugador {
     @Override
     public String toString() {
         ArrayList<Edificio> edificios = new ArrayList<>();
-        StringBuilder sProp = new StringBuilder();
         StringBuilder sHip = new StringBuilder();
         for (Propiedad prop : propiedades) {
             if (prop instanceof Solar && ((Solar)prop).getEdificios()!=null) edificios.addAll(((Solar)prop).getEdificios());
-            if (!prop.getHipotecado()) sProp.append(prop.getNombre()).append(" ");
             else sHip.append(prop.getNombre()).append(" ");
         }
         return "{\n" +
                 "nombre: " + nombre + ",\n" +
                 "avatar: " + avatar + ",\n" +
                 "fortuna: " + dinero + ",\n" +
-                "propiedades: [" + sProp + "]\n" +
+                "propiedades: "+ propiedades +"\n" +
                 "hipotecas: [" + sHip + "]\n" +
                 "edificios: "+edificios+"\n" +
                 "}";
