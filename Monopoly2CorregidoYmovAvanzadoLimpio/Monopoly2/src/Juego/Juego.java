@@ -5,7 +5,7 @@ import java.util.*;
 import Procesos.*;
 import Procesos.Casillas.*;
 
-public class Juego {
+public class Juego implements Comando{
     //ATRIBUTOS
     private static Tablero tablero;
     private final int dineroInicial;
@@ -19,9 +19,9 @@ public class Juego {
     private final Dado dado;
     private Carta carta;
     private final int precioCarcel;
-    private boolean pagando; //Un booleano que se activa si el usuario está en trámites de pagar una deuda (para darle opciones de vender, hipotecar, etc)...
-    private int pagoPendiente;
-    private Jugador cobradorPendiente;
+    private static boolean pagando; //Un booleano que se activa si el usuario está en trámites de pagar una deuda (para darle opciones de vender, hipotecar, etc)...
+    private static int pagoPendiente;
+    private static Jugador cobradorPendiente;
     private final StringBuilder avataresRep = new StringBuilder("!");
 
     Map<Jugador, Map<Casilla, Integer>> contadorCasillas = new HashMap<>();
@@ -353,38 +353,6 @@ public class Juego {
         }
     }
 
-    /**
-     * Listar copia los condicionales de menuAcción para enseñar al jugador las opciones que tiene disponibles.
-     *
-     * @param haTirado si el jugadorActual ha tirado ya en este turno
-     */
-    private void listar(boolean haTirado) {
-        System.out.println("----MENU DE AYUDA----");
-        System.out.println("  ayuda: imprime esta lista de opciones");
-        System.out.println("  jugador: imprime el nombre y avatar del jugador actual");
-        System.out.println("  listar jugadores: imprime una lista de los jugadores y sus características");
-        if (!haTirado)
-            if (jugadorActual.inCarcel())
-                System.out.println("lanzar dados: lanzar dados para intentar salir de la cárcel");
-            else System.out.println("  lanzar dados: lanzar los dados para avanzar");
-        if (haTirado) {
-            System.out.println("  lanzar dados: puedes volver a lanzar los dados si has sacado dados dobles.");
-            System.out.println("  acabar turno: finaliza el turno y pasa al siguiente jugador");
-        }
-        if (jugadorActual.inCarcel())
-            System.out.println("  salir carcel: pagas " + pSalida / 4 + " para salir de la carcel");
-        System.out.println("  describir nombreCasilla: imprime una descripción de la casilla indicada");
-        System.out.println("  describir jugador x: imprime una descripción del jugador indicado(x)");
-        System.out.println("  describir avatar  x: imprime una descripción del avatar indicado (x)");
-        if (haTirado && jugadorActual.getCasilla(tablero.getCasillas()).isComprable())
-            System.out.println("  comprar propiedad: si tienes dinero, compra la casilla en la que se encuentra tu avatar");
-        System.out.println("  listar en venta: lista las casillas(solares, servicios y transportes) disponibles para comprar");
-        System.out.println("  ver tablero: imprime el tablero por pantalla");
-        if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 1) {// Si está en modo avanzado, no ha terminado de pararse en las casillas y es pelota
-            System.out.println("  acabar parada: visita la próxima casilla disponible tras moverte con movimiento avanzado");
-        }
-        System.out.println("  fin partida: termina el juego");
-    }
 
 
     /**
@@ -407,14 +375,182 @@ public class Juego {
         } else System.out.println("Cuidado... Ya no tienes dinero suficiente para comprar esta casilla.");
     }
 
+
+    //INTERFAZ COMANDO
     /**
-     * Cada vez que se cambia de jugador se llama desde main a menuAcción(false). Después, se hacen llamadas recursivas de menuAcción(false/true, según corresponda) desde el propio menuAccion hasta el fin de turno
-     * Llamamos desde la función menuAcción como método para mantener la información de haTirado.
-     * Usar recursividad aquí no debería dar problemas pq contamos con que un jugador no haga 20 acciones distintas en su turno
+     * ayuda copia los condicionales de menuAcción para enseñar al jugador las opciones que tiene disponibles.
      *
-     * @param haTirado Si ha tirado o no.
-     * @return devuelve un booleano para indicar si sigue la partida o no
+     * @param haTirado si el jugadorActual ha tirado ya en este turno
      */
+    public void ayuda(boolean haTirado){
+        System.out.println("Listado de acciones");
+    }
+    public void imprimirTablero(){
+        tablero.imprimirTablero();
+    }
+    public void jugador(){
+        System.out.println("Nombre: " + jugadorActual.getNombre());
+        System.out.println("Avatar: " + jugadorActual.getAvatar());
+        System.out.println("Dinero: " + jugadorActual.getDinero());
+        System.out.println("Posición: " + jugadorActual.getPosicion());
+    }
+    public void tirarDados(){
+
+    }
+    public void tirarDadosTrucados(){
+
+    }
+    public void comprar(String[] entradaPartida, boolean haTirado){ //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
+        if (jugadorActual.getBancarrota()) {
+            System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
+        }
+        else if (!haTirado) {
+            System.out.println("Aun no has tirado los dados. Tiralos para poder comprar propiedades");
+        }
+        else if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
+            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
+                if (jugadorActual.getPuedeComprarPropiedades()) {
+                    if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
+                        System.out.println("No puedes comprar esta propiedad");
+                    } else {
+                        comprarCasilla();
+                        System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
+                        System.out.println("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
+                        jugadorActual.setPuedeComprarPropiedades(false);
+                    }
+                } else {
+                    System.out.println("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
+                }
+            }
+            else if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
+                System.out.println("No puedes comprar esta propiedad");
+                //break;
+            } else {
+                comprarCasilla();
+                System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
+            }
+        } else { //Si está intentando comprar otra propiedad le avisamos...
+            boolean c = true;
+            for (Casilla ite : getTablero().getCasillas()) {
+                if (entradaPartida[1].equals(ite.getNombre())) {
+                    System.out.println("Solo puedes comprar la casilla en la que caes...");
+                    c = false;
+                }
+            }
+            if (c) System.out.println("Esta casilla no existe");
+        }
+    }
+    public void edificar(){
+
+    }
+    public void venderEdificio(){
+
+    }
+    public void hipotecar(String[] entradaPartida){
+        if (jugadorActual.getBancarrota())
+            System.out.println("Ya no puedes hipotecar, desgraciadamente estas en bancarrota y la partida se ha acabado para ti.");
+        else if (entradaPartida.length > 1) {
+            Casilla casilla = tablero.getCasilla(entradaPartida[1]);
+            if (casilla == null)
+                System.out.println("Esta casilla no existe");
+            else if (!(casilla instanceof Propiedad))
+                System.out.println("Esta casilla no es hipotecable");
+            else if (!((Propiedad) casilla).getPropietario().equals(jugadorActual))
+                System.out.println("No puedes hipotecar una casilla que no es tuya");
+            else
+                ((Propiedad) casilla).hipotecar();
+        }
+    }
+    public void deshipotecar(String[] entradaPartida){
+        if (jugadorActual.getBancarrota())
+            System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
+        else if (entradaPartida.length > 1) {
+            Casilla casilla = tablero.getCasilla(entradaPartida[1]);
+            if (casilla == null)
+                System.out.println("Esta casilla no existe");
+            else if (!(casilla instanceof Propiedad))
+                System.out.println("Esta casilla no es hipotecable");
+            else if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
+                System.out.println("No puedes deshipotecar una casilla que no es tuya");
+            }
+            else ((Propiedad) casilla).deshipotecar();
+        }
+    }
+    public void bancarrota(){
+
+    }
+    public void describirJugador(){
+
+    }
+    public void describirCasilla(){
+
+    }
+    public void describirAvatar(){
+
+    }
+    public void listarJugadores(){
+        for (Jugador jugadore : jugadores) {
+            System.out.println(jugadore);
+        }
+    }
+    public void listarEnVenta(){
+        for (Casilla casilla : tablero.getCasillas()) {
+            if (casilla.isComprable()) System.out.println(" " + casilla.descripcion());
+        }
+    }
+    public void listarAvatares(){
+        for (Jugador ite : jugadores) {
+            System.out.println("{\n" +
+                    "id: " + ite.getAvatar() + "\n" +
+                    "tipo: " + "N/A" + ",\n" +
+                    "casilla: " + ite.getCasilla(tablero.getCasillas()) + "\n" +
+                    "jugador: " + ite.getNombre() + "\n" +
+                    "}");
+        }
+    }
+    public void listarEdificios() {
+        for (Casilla cite : tablero.getCasillas()) {
+            if (cite instanceof Solar)
+                if (((Solar) cite).getEdificios() != null)
+                    for (Edificio eite : ((Solar) cite).getEdificios())
+                        System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
+        }
+    }
+    public void listarEdificiosColor(String[] entradaPartida){
+        for (Grupo ite : tablero.getGrupos()) {
+            if (ite.getColor().equals(entradaPartida[2])) {
+                for (Solar cite : ite.getCasillas()) {
+                    if (cite != null)
+                        for (Edificio eite : cite.getEdificios())
+                            System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
+                }
+            }
+        }
+        System.out.println("No se reconoce el grupo/color");
+    }
+    public void salirCarcel(){
+
+    }
+    public void pagarDeuda(){
+
+    }
+    public void acabarTurno(){
+
+    }
+    public void acabarPartida(){
+
+    }
+    public void cambiarMovimiento(){
+
+    }
+    public void estadisticas(){
+
+    }
+    public void estadisticasJugador(){
+
+    }
+
+
     public boolean menuAccion(boolean haTirado) { //Lee y llama a la acción indicada sobre el jugadorActual
         //Comprobaciones/actualizaciones en cada turno
         actualizarPropietarioCasillas();
@@ -430,158 +566,44 @@ public class Juego {
             //case "numero": System.out.println(jugadores.size());break;
             case "ayuda":
             case "Ayuda":
-                listar(haTirado);
-                return menuAccion(haTirado);
-
+                ayuda(haTirado);
             case "jugador":
             case "Jugador":
-                System.out.println("Nombre: " + jugadorActual.getNombre());
-                System.out.println("Avatar: " + jugadorActual.getAvatar());
-                System.out.println("Dinero: " + jugadorActual.getDinero());
-                System.out.println("Posición: " + jugadorActual.getPosicion());
-                return menuAccion(haTirado);
+                jugador();
             case "listar":
                 if (entradaPartida.length > 1) switch (entradaPartida[1]) {
                     case "Jugadores":
                     case "jugadores":
-                        for (Jugador jugadore : jugadores) {
-                            System.out.println(jugadore);
-                        }
-                        return menuAccion(haTirado);
+                        listarJugadores();
+                        break;
                     case "en":
                     case "En":
                         if (entradaPartida.length > 2 && (entradaPartida[2].equals("venta") || entradaPartida[2].equals("Venta"))) {
-                            for (Casilla casilla : tablero.getCasillas()) {
-                                if (casilla.isComprable()) System.out.println(" " + casilla.descripcion());
-                            }
-
-                            return menuAccion(haTirado);
+                            listarEnVenta();
                         }
                         break;
                     case "Avatares":
                     case "avatares":
-                        for (Jugador ite : jugadores) {
-                            System.out.println("{\n" +
-                                    "id: " + ite.getAvatar() + "\n" +
-                                    "tipo: " + "N/A" + ",\n" +
-                                    "casilla: " + ite.getCasilla(tablero.getCasillas()) + "\n" +
-                                    "jugador: " + ite.getNombre() + "\n" +
-                                    "}");
-                        }
-                        return menuAccion(haTirado);
+                        listarAvatares();
+                        break;
                     case "Edificios":
                     case "edificios":
                         if (entradaPartida.length > 2) {
-                            for (Grupo ite : tablero.getGrupos()) {
-                                if (ite.getColor().equals(entradaPartida[2])) {
-                                    for (Solar cite : ite.getCasillas()) {
-                                        if (cite != null)
-                                            for (Edificio eite : cite.getEdificios())
-                                                System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
-                                    }
-                                    return menuAccion(haTirado);
-                                }
-                            }
-                            System.out.println("No se reconoce el grupo/color");
-                        } else for (Casilla cite : tablero.getCasillas()) {
-                            if (cite instanceof Solar)
-                                if (((Solar) cite).getEdificios() != null)
-                                    for (Edificio eite : ((Solar) cite).getEdificios())
-                                        System.out.println(" " + eite.getIdentificador() + " - " + eite.getCasilla());
-                        }
+                            listarEdificiosColor(entradaPartida);
+                        } else listarEdificios();
+                        break;
                 }
                 break;
             case "hipotecar":
             case "Hipotecar":
-                if (jugadorActual.getBancarrota()) {
-                    System.out.println("Ya no puedes hipotecar, desgraciadamente estas en bancarrota y la partida se ha acabado para ti.");
-                    break;
-                }
-                if (entradaPartida.length > 1) {
-                    Casilla casilla = tablero.getCasilla(entradaPartida[1]);
-                    if (casilla == null) {
-                        System.out.println("Esta casilla no existe");
-                        break;
-                    }
-                    if (!(casilla instanceof Propiedad)) {
-                        System.out.println("Esta casilla no es hipotecable");
-                        break;
-                    }
-                    if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
-                        System.out.println("No puedes hipotecar una casilla que no es tuya");
-                        break;
-                    }
-                    ((Propiedad) casilla).hipotecar();
-                }
+                hipotecar(entradaPartida);
                 break;
             case "deshipotecar":
             case "Deshipotecar":
-                if (jugadorActual.getBancarrota()) {
-                    System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
-                if (entradaPartida.length > 1) {
-                    Casilla casilla = tablero.getCasilla(entradaPartida[1]);
-                    if (casilla == null) {
-                        System.out.println("Esta casilla no existe");
-                        break;
-                    }
-                    if (!(casilla instanceof Propiedad)) {
-                        System.out.println("Esta casilla no es hipotecable");
-                        break;
-                    }
-                    if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
-                        System.out.println("No puedes deshipotecar una casilla que no es tuya");
-                        break;
-                    }
-                    ((Propiedad) casilla).deshipotecar();
-                }
+                deshipotecar(entradaPartida);
                 break;
             case "comprar":
-                if (jugadorActual.getBancarrota()) {
-                    System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
-                if (!haTirado) {
-                    System.out.println("Aun no has tirado los dados. Tiralos para poder comprar propiedades");
-                    break;
-                }
-
-                if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
-                    if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
-                        if (jugadorActual.getPuedeComprarPropiedades()) {
-                            if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
-                                System.out.println("No puedes comprar esta propiedad");
-                                return menuAccion(false);
-                            } else {
-                                comprarCasilla();
-                                System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
-                                System.out.println("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
-                                jugadorActual.setPuedeComprarPropiedades(false); //
-                                return menuAccion(false);
-                            }
-                        } else {
-                            System.out.println("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
-                            return menuAccion(false);
-                        }
-                    }
-                    if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
-                        System.out.println("No puedes comprar esta propiedad");
-                        //break;
-                    } else {
-                        comprarCasilla();
-                        System.out.println("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
-                        return menuAccion(true);
-                    }
-                } else { //Si está intentando comprar otra propiedad le avisamos...
-                    for (Casilla ite : getTablero().getCasillas()) {
-                        if (entradaPartida[1].equals(ite.getNombre())) {
-                            System.out.println("Solo puedes comprar la casilla en la que caes...");
-                            return menuAccion(haTirado);
-                        }
-                    }
-                    System.out.println("Esta casilla no existe");
-                }
+                comprar(entradaPartida, haTirado);
                 break;
             case "salir":
                 if (jugadorActual.getBancarrota()) {
@@ -982,7 +1004,6 @@ public class Juego {
             cobradorPendiente = cobrador;
             pagoPendiente = importe;
             gestInsuf();
-
         }
         cobradorPendiente = banca;
         pagando = false;

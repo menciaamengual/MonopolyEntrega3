@@ -248,6 +248,8 @@ public class Jugador {
         return false;
     }
 
+
+    //todo modificar con excepciones.
     /**
      *
      * @param alquiler
