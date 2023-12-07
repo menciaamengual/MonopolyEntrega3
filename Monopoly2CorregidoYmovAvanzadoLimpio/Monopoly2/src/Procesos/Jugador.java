@@ -235,7 +235,7 @@ public class Jugador {
      * @param alquiler calculado (en principio) con la función calcularAlquiler(), cantidad a pagar
      * @return si puede o no pagar
      */
-    public boolean pagar(int alquiler, Jugador cobrador) {
+    public boolean pagar(int alquiler, Jugador cobrador) { //Todo actualizar esto para que sea como pagarAv
         if (dinero<alquiler)
             return false;
             //gestAcreedores(alquiler,cobrador);

@@ -98,7 +98,6 @@ public abstract class Casilla{
                 "}\n";
     }
 }
-
 //
 //public class Casilla {
 //    //ATRIBUTOS

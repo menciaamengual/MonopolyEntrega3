@@ -44,7 +44,6 @@ public class Juego {
         pagando = false;
         cobradorPendiente = banca;
         pagoPendiente = 0;
-        // hayBug=false;
     }
 
     //METODOS PUBLICOS
@@ -340,7 +339,7 @@ public class Juego {
      *
      * @param
      */
-    public void accionCasilla() {
+    public void accionCasilla() { //Reemplazar por llamadas puntuales de la casilla - casilla.accionCasilla();
         contadorCasillas.get(jugadorActual).put(jugadorActual.getCasilla(tablero.getCasillas()), contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) + 1);
         //System.out.println("Caída "+contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())));
         int t = jugadorActual.getCasilla(tablero.getCasillas()).getTipo();
