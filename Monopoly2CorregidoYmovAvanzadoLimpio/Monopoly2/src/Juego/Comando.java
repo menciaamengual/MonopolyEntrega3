@@ -7,14 +7,14 @@ public abstract interface Comando {
     void tirarDados();
     void tirarDadosTrucados();
     void comprar(String[] entradaPartida, boolean haTirado);
-    void edificar();
-    void venderEdificio();
+    void edificar(String[] entradaPartida);
+    void venderEdificio(String[] entradaPartida);
     void hipotecar(String[] entradaPartida);
     void deshipotecar(String[] entradaPartida);
     void bancarrota();
-    void describirJugador();
-    void describirCasilla();
-    void describirAvatar();
+    void describirJugador(String[] entradaPartida);
+    void describirCasilla(String s);
+    void describirAvatar(String[] entradaPartida);
     void listarJugadores();
     void listarAvatares();
     void listarEnVenta();
@@ -22,10 +22,10 @@ public abstract interface Comando {
     void listarEdificios();
     void salirCarcel();
     void pagarDeuda();
-    void acabarTurno();
-    void acabarPartida();
-    void cambiarMovimiento();
+    boolean acabarTurno(boolean haTirado);
+    void acabarParada();
+    void cambiarMovimiento(boolean haTirado);
     void estadisticas();
-    void estadisticasJugador();
+    void estadisticasJugador(String[] entradaPartida);
 
 }
