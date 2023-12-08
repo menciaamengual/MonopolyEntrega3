@@ -6,6 +6,7 @@ import Procesos.*;
 import Procesos.Casillas.*;
 
 public class Juego implements Comando{
+    private static ConsolaNormal consolaNormal;
     //ATRIBUTOS
     private static Tablero tablero;
     private final int dineroInicial;
@@ -48,31 +49,34 @@ public class Juego implements Comando{
 
     //METODOS PUBLICOS
     public void darAlta() {
-        Scanner entrada = new Scanner(System.in);
-        System.out.println("Introduce tu nombre, Jugador " + (jugadores.size() + 1) + " : ");
-        String miNombre = entrada.nextLine();
+        String miNombre = consolaNormal.leer("Introduce tu nombre, Jugador " + (jugadores.size() + 1) + " : ");
+        char miAvatar = generaAvatar();
+
+        int tipo;
+        String inputTipo;
+        do {
+            inputTipo = consolaNormal.leer("Elige tipo de ficha (coche o pelota):");
+            if (inputTipo.equalsIgnoreCase("coche"))
+                tipo = 1;
+             else if (inputTipo.equalsIgnoreCase("pelota"))
+                tipo = 0;
+             else {
+                consolaNormal.imprimir("Tipo no válido. Por favor, introduce coche o pelota.");
+                tipo = -1; // Para que el bucle se ejecute otra vez hasta que el usuario escoja una opción válida
+            }
+        } while (tipo == -1);
+        jugadores.add(new Jugador(dineroInicial, miNombre, miAvatar, tipo));
+        for (Jugador ite : jugadores)
+            ite.setFortuna(dineroInicial);
+    }
+
+    private char generaAvatar() {
         char miavatar;
         do {
             miavatar = generaCharRandom();
         } while (avataresRep.toString().contains(String.valueOf(miavatar)));
         avataresRep.append(miavatar);
-        int tipo;
-        String inputTipo;
-        do {
-            System.out.println("Elige tipo de ficha (coche o pelota):");
-            inputTipo = entrada.nextLine();
-            if (inputTipo.equalsIgnoreCase("coche")) {
-                tipo = 1;
-            } else if (inputTipo.equalsIgnoreCase("pelota")) {
-                tipo = 0;
-            } else {
-                System.out.println("Tipo no válido. Por favor, introduce coche o pelota.");
-                tipo = -1; // Para que el bucle se ejecute otra vez hasta que el usuario escoja una opción válida
-            }
-        } while (tipo == -1);
-        jugadores.add(new Jugador(dineroInicial, miNombre, miavatar, tipo));
-        for (Jugador ite : jugadores)
-            ite.setFortuna(dineroInicial);
+        return miavatar;
     }
 
     //GETTERS
