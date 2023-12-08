@@ -33,7 +33,7 @@ public class Juego implements Comando{
 
     //CONSTRUCTORES
     public Juego() {
-        jugadores = new ArrayList<Jugador>(6); //La banca se maneja como un jugador externo (banca).
+        jugadores = new ArrayList<>(6); //La banca se maneja como un jugador externo (banca).
         banca = new Jugador();
         pSalida = Grupo.mediaSolares();
         tablero = new Tablero(pBase, pSalida, banca);
@@ -139,7 +139,6 @@ public class Juego implements Comando{
                         }
                         // Si es par, no se hace nada.
                     }
-                    return;
                 } else {
                     int aux = jugadorActual.getPosicion(); // guardamos la posición para comprobar paridades
                     for (int i = avance; i > 0; i--) {
@@ -394,12 +393,127 @@ public class Juego implements Comando{
         System.out.println("Dinero: " + jugadorActual.getDinero());
         System.out.println("Posición: " + jugadorActual.getPosicion());
     }
-    public void tirarDados(){
+    public boolean tirarDados(boolean haTirado, String[] entradaPartida){
+// EN PRIMER LUGAR, COMPROBAMOS SI EL JUGADOR ESTÁ EN LA CÁRCEL Y EJECUTAMOS LAS ACCIONES CORRESPONDIENTES
+        if (jugadorActual.inCarcel()) {
+            if (jugadorActual.getTurnosCarcel() == 1) {
+                //En el último turno de carcel, tiene que pagar, y no juega, no puede tirar más veces
+                System.out.println("Ya no puedes tirar más veces los dados :(");
+            }
+            else if (jugadorActual.getTurnosCarcel() > 1) {
+                System.out.println("Te quedan " + (jugadorActual.getTurnosCarcel() - 1) + " oportunidades para salir de la cárcel tirando los dados. ¡Adelante!");
+                if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
+                    dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
+                    jugadorActual.addVecesDados();
+                } else {
+                    dado.tirarDados();
+                    jugadorActual.addVecesDados();
+                }
+                if (dado.areEqual()) {
+                    System.out.println("¡Dados dobles! Enhorabuena, sales de la cárcel :)");
+                    return true;
+                } else {
+                    System.out.println("Oh no... No has sacado dados dobles. Te quedas en la cárcel.");
+                    jugadorActual.setTurnosCarcel(jugadorActual.getTurnosCarcel() - 1);
+                    return true;
+                }
+            }
+        } else { // SI NO ESTÁ EN LA CÁRCEL...
 
-    }
-    public void tirarDadosTrucados(){
+            // 1. NO LE DEJAMOS TIRAR SI TIENE EL MOTOR ROTO
+            if (jugadorActual.getTipoMov() == 1 && jugadorActual.getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
+                System.out.println("Tu motor sigue roto. ¡No puedes moverte!");
+                return true;
+            }
 
+            // 2. HACEMOS RETURN EN LOS CASOS EN LOS QUE *NO* PUEDE LANZAR DADOS
+
+            if (!puedeTirarOtraVez(haTirado)) {
+                System.out.println("¡No puedes volver a tirar los dados!");
+                return true;
+            }
+
+            // SI LLEGAMOS HASTA AQUÍ, EL JUGADOR PUEDE TIRAR. PROCEDEMOS A TIRAR:
+
+            if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
+                dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
+                jugadorActual.addVecesDados();
+            } else {
+                dado.tirarDados();
+                jugadorActual.addVecesDados();
+            }
+            System.out.println("Has sacado un " + dado.getDado1() + " y un " + dado.getDado2());
+
+            // REALIZAMOS LA ACCIÓN CORRESPONDIENTE SI SE SACA DOBLES:
+
+            if (dado.areEqual()) {
+                if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
+                    if (jugadorActual.getAuxMovAvanzado() == 0)
+                        System.out.println("Has sacado dobles! Puedes volver a tirar.");
+                } else { // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
+                    System.out.println("Has sacado dobles! Puedes volver a tirar.");
+                }
+                if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 999) {
+                    System.out.println("Como el movimiento avanzado está activado, la tirada extra de dados será cuando pases por todas las paradas.");
+                }
+            }
+
+            // DESPUÉS DE TIRAR, AVANZAMOS EN MOVIMIENTO NORMAL O AVANZADO, SEGÚN CORRESPONDA:
+
+            // Primero, mandamos a la cárcel si corresponde
+            if (dado.getC() == 3) {
+                System.out.println("Has sacado dados dobles 3 veces seguidas. ¡Vas a la cárcel! ");
+                jugadorActual.enviarCarcel(tablero.getCasillas());
+                if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1))
+                    tablero.imprimirTablero();
+                return true;
+            }
+            // Si el Movimiento Avanzado está activado...
+            if (jugadorActual.getMovAvanzadoActivado()) {
+                if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                    // Si es el primer turno
+                    // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
+                    avanzarCasillas(dado.getSuma(), jugadorActual.getAuxMovAvanzado() == 999);
+                }
+                if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                    if (jugadorActual.getAuxMovAvanzado() == 999) { // Si es el primer turno
+                        avanzarCasillas(dado.getSuma(), true);
+                    } else { // Si no es el primer turno...
+                        if (jugadorActual.getAuxMovAvanzado() == 0) { // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
+                            avanzarCasillas(dado.getSuma(), false);
+                        } else { // Si no acabó sus tiradas extra
+                            if (dado.getSuma() > 3) {
+                                jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() - 1); // Restamos 1 a las tiradas extra
+                                avanzarCasillas(dado.getSuma(), false);
+                                // Avisamos de cuántas tiradas extra le quedan
+                                if (jugadorActual.getAuxMovAvanzado() > 0) {
+                                    System.out.printf("\nLanzamientos extra restantes: %d. Cuando saques menos de un 4, no podrás tirar de nuevo.\n", jugadorActual.getAuxMovAvanzado());
+                                } else {
+                                    System.out.print("\nNo te quedan más lanzamientos extra por el movimiento especial.\n");
+                                    if (dado.areEqual()) {
+                                        System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada extra!\n");
+                                    }
+                                }
+                            } else { // Si saca menos de 4, no se mueve y además no tiene más tiradas extra.
+                                jugadorActual.setAuxMovAvanzado(0);
+                                System.out.println("\nHas sacado menos de un 4, por lo que no tienes más lanzamientos extra.");
+                                if (dado.areEqual()) {
+                                    System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada más!\n");
+                                }
+                            }
+                        }
+                    }
+                }
+            } else { // Si el movimiento avanzado no está activado
+                avanzarCasillas(dado.getSuma(), false);
+            }
+            tablero.imprimirTablero();
+            accionCasilla();
+            return true;
+        } // Finalización del "if" "¿Está en la cárcel?"
+        return false;
     }
+
     public void comprar(String[] entradaPartida, boolean haTirado){ //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
         if (jugadorActual.getBancarrota()) {
             System.out.println("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
@@ -781,129 +895,7 @@ public class Juego implements Comando{
                     break;
                 }
                 if (entradaPartida[1].equals("dados")) {
-
-                    // EN PRIMER LUGAR, COMPROBAMOS SI EL JUGADOR ESTÁ EN LA CÁRCEL Y EJECUTAMOS LAS ACCIONES CORRESPONDIENTES
-
-                    if (jugadorActual.inCarcel()) {
-                        if (jugadorActual.getTurnosCarcel() == 1) {
-                            //En el último turno de carcel, tiene que pagar, y no juega, no puede tirar más veces
-                            System.out.println("Ya no puedes tirar más veces los dados :(");
-                            return menuAccion(false);
-                        }
-
-                        if (jugadorActual.getTurnosCarcel() > 1) {
-                            System.out.println("Te quedan " + (jugadorActual.getTurnosCarcel() - 1) + " oportunidades para salir de la cárcel tirando los dados. ¡Adelante!");
-                            if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
-                                dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
-                                jugadorActual.addVecesDados();
-                            } else {
-                                dado.tirarDados();
-                                jugadorActual.addVecesDados();
-                            }
-                            if (dado.areEqual()) {
-                                System.out.println("¡Dados dobles! Enhorabuena, sales de la cárcel :)");
-                                return menuAccion(true);//t/f
-                            } else {
-                                System.out.println("Oh no... No has sacado dados dobles. Te quedas en la cárcel.");
-                                jugadorActual.setTurnosCarcel(jugadorActual.getTurnosCarcel() - 1);
-                                return menuAccion(true);
-                            }
-                        }
-                        break;
-
-                    } else { // SI NO ESTÁ EN LA CÁRCEL...
-
-                        // 1. NO LE DEJAMOS TIRAR SI TIENE EL MOTOR ROTO
-                        if (jugadorActual.getTipoMov() == 1 && jugadorActual.getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
-                            System.out.println("Tu motor sigue roto. ¡No puedes moverte!");
-                            return menuAccion(true);
-                        }
-
-                        // 2. HACEMOS RETURN EN LOS CASOS EN LOS QUE *NO* PUEDE LANZAR DADOS
-
-                        if (!puedeTirarOtraVez(haTirado)) {
-                            System.out.println("¡No puedes volver a tirar los dados!");
-                            return menuAccion(true);
-                        }
-
-                        // SI LLEGAMOS HASTA AQUÍ, EL JUGADOR PUEDE TIRAR. PROCEDEMOS A TIRAR:
-
-                        if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
-                            dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
-                            jugadorActual.addVecesDados();
-                        } else {
-                            dado.tirarDados();
-                            jugadorActual.addVecesDados();
-                        }
-                        System.out.println("Has sacado un " + dado.getDado1() + " y un " + dado.getDado2());
-
-                        // REALIZAMOS LA ACCIÓN CORRESPONDIENTE SI SE SACA DOBLES:
-
-                        if (dado.areEqual()) {
-                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
-                                if (jugadorActual.getAuxMovAvanzado() == 0)
-                                    System.out.println("Has sacado dobles! Puedes volver a tirar.");
-                            } else { // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
-                                System.out.println("Has sacado dobles! Puedes volver a tirar.");
-                            }
-                            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 999) {
-                                System.out.println("Como el movimiento avanzado está activado, la tirada extra de dados será cuando pases por todas las paradas.");
-                            }
-                        }
-
-                        // DESPUÉS DE TIRAR, AVANZAMOS EN MOVIMIENTO NORMAL O AVANZADO, SEGÚN CORRESPONDA:
-
-                        // Primero, mandamos a la cárcel si corresponde
-                        if (dado.getC() == 3) {
-                            System.out.println("Has sacado dados dobles 3 veces seguidas. ¡Vas a la cárcel! ");
-                            jugadorActual.enviarCarcel(tablero.getCasillas());
-                            if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1))
-                                tablero.imprimirTablero();
-                            return menuAccion(true);
-                        }
-                        // Si el Movimiento Avanzado está activado...
-                        if (jugadorActual.getMovAvanzadoActivado()) {
-                            if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
-                                // Si es el primer turno
-                                // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
-                                avanzarCasillas(dado.getSuma(), jugadorActual.getAuxMovAvanzado() == 999);
-                            }
-                            if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                                if (jugadorActual.getAuxMovAvanzado() == 999) { // Si es el primer turno
-                                    avanzarCasillas(dado.getSuma(), true);
-                                } else { // Si no es el primer turno...
-                                    if (jugadorActual.getAuxMovAvanzado() == 0) { // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
-                                        avanzarCasillas(dado.getSuma(), false);
-                                    } else { // Si no acabó sus tiradas extra
-                                        if (dado.getSuma() > 3) {
-                                            jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() - 1); // Restamos 1 a las tiradas extra
-                                            avanzarCasillas(dado.getSuma(), false);
-                                            // Avisamos de cuántas tiradas extra le quedan
-                                            if (jugadorActual.getAuxMovAvanzado() > 0) {
-                                                System.out.printf("\nLanzamientos extra restantes: %d. Cuando saques menos de un 4, no podrás tirar de nuevo.\n", jugadorActual.getAuxMovAvanzado());
-                                            } else {
-                                                System.out.print("\nNo te quedan más lanzamientos extra por el movimiento especial.\n");
-                                                if (dado.areEqual()) {
-                                                    System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada extra!\n");
-                                                }
-                                            }
-                                        } else { // Si saca menos de 4, no se mueve y además no tiene más tiradas extra.
-                                            jugadorActual.setAuxMovAvanzado(0);
-                                            System.out.println("\nHas sacado menos de un 4, por lo que no tienes más lanzamientos extra.");
-                                            if (dado.areEqual()) {
-                                                System.out.print("\nPero como has sacado dobles... ¡Tienes otra tirada más!\n");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else { // Si el movimiento avanzado no está activado
-                            avanzarCasillas(dado.getSuma(), false);
-                        }
-                        tablero.imprimirTablero();
-                        accionCasilla();
-                        return menuAccion(true);
-                    } // Finalización del "if" "¿Está en la cárcel?"
+                    haTirado = tirarDados(haTirado,entradaPartida);
                 }
                 break;
             case "cambiar":
