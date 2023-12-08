@@ -1,11 +1,10 @@
 package Juego;
 
-public abstract interface Comando {
+public interface Comando {
     void ayuda(boolean haTirado);
     void imprimirTablero();
     void jugador();
-    void tirarDados();
-    void tirarDadosTrucados();
+    boolean tirarDados(boolean haTirado, String[] entradaPartida);
     void comprar(String[] entradaPartida, boolean haTirado);
     void edificar(String[] entradaPartida);
     void venderEdificio(String[] entradaPartida);
