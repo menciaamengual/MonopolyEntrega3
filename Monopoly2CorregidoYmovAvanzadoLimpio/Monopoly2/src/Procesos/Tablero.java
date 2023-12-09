@@ -1,10 +1,11 @@
 package Procesos;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import Juego.*;
+
+import Juego.Juego;
+import Procesos.Casillas.*;
 
 public class Tablero {
     static int ccasa = 0;
@@ -91,11 +92,50 @@ public class Tablero {
 
     ArrayList<String> nombres = new ArrayList<>(casillasMap.keySet());
 
+        int[] ArrayAux_tipoCasilla = {7, 0, 3, 0, 6, 1, 0, 3, 0, 0, 4, 0, 2, 0, 0, 1, 0, 3, 0, 0, 5, 0, 3, 0, 0, 1, 0, 0, 2, 0, 8, 0, 0, 3, 0, 1, 3, 0, 6, 0};
+        /*
+            0. Solar
+            1. Transporte
+            2. Servicios
+            3. Comunidad
+             9. Suerte
+            4. Cárcel
+            5. Párking gratuito
+            6.
+         */
 
         casillas = new ArrayList<>(40);
         for (int i = 0; i < 40; i++) { //Inicialización de casillas
-            casillas.add(new Casilla(pBase, pSalida, i, nombres.get(i),grupos));
-            casillas.get(i).setPropietario(banca);
+            switch(ArrayAux_tipoCasilla[i]){
+                case 0:
+                    casillas.add(new Solar(pBase, pSalida, i, nombres.get(i), grupos, banca));
+                    break;
+                case 1:
+                    casillas.add(new Transporte(i,nombres.get(i),banca,pSalida));
+                    break;
+                case 2:
+                    casillas.add(new Servicios(i,nombres.get(i),banca,pSalida));
+                    break;
+                case 3:
+                    casillas.add(new Comunidad(i,nombres.get(i)));
+                    break;
+                case 4:
+                    casillas.add(new Carcel(i,nombres.get(i)));
+                    break;
+                case 5:
+                    casillas.add(new ParkingGratuito(i,nombres.get(i)));
+                    break;
+                case 6:
+                    if (i<20) casillas.add(new Impuesto(i,nombres.get(i),pSalida/2));
+                    else casillas.add(new Impuesto(i,nombres.get(i),pSalida));
+                    break;
+                case 7:
+                    casillas.add(new Salida(i,nombres.get(i)));
+                    break;
+                case 8:
+                    casillas.add(new VasALaCarcel(i,nombres.get(i)));
+                    break;
+            }
         }
 
     }
@@ -107,7 +147,7 @@ public class Tablero {
 
     public String toString() { //Usamos casilla.toString
         StringBuilder stab = new StringBuilder();
-        stab.append(String.format("\u001B[4m%"+(Casilla.getLonMaxNombre()+6+3)*11+"s\u001B[0m\n"," "));
+        stab.append(String.format("\u001B[4m%"+(Casilla.lonMaxNombre+6+3)*11+"s\u001B[0m\n"," "));
 
 
         for (int i = 20; i < (19+12); i++) {
@@ -115,7 +155,7 @@ public class Tablero {
         }
         stab.append("\n");
         int j;
-        int lonMaxNombre = Casilla.getLonMaxNombre();
+        int lonMaxNombre = Casilla.lonMaxNombre;
         int n = (lonMaxNombre+9)*9;
         String formato = "%"+n+"s";
 
@@ -129,7 +169,7 @@ public class Tablero {
             stab.append("\n");
         }
         stab.append(casillas.get(11).toString());
-        stab.append(String.format("\u001B[4m%"+(Casilla.getLonMaxNombre()+6+3)*9+"s\u001B[0m"," "));//
+        stab.append(String.format("\u001B[4m%"+(Casilla.lonMaxNombre+6+3)*9+"s\u001B[0m"," "));//
         stab.append(casillas.get(31+8).toString());
         stab.append("\n");
 
@@ -174,14 +214,14 @@ public class Tablero {
     }
 
     public void imprimirTablero(){
-        System.out.println(this);
+        Juego.getConsolaNormal().imprimir(this.toString());
     }
 
 
     public int precioTotal() {
         int c = 0;
         for (Casilla casilla:casillas){
-            c+=casilla.getPrecio();
+            if (casilla instanceof Propiedad) c+=((Propiedad)casilla).getPrecio();
         }
         return c;
     }
