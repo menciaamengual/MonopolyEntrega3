@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import Juego.Juego;
 import Procesos.Casillas.*;
 
 public class Tablero {
@@ -213,7 +214,7 @@ public class Tablero {
     }
 
     public void imprimirTablero(){
-        System.out.println(this);
+        Juego.getConsolaNormal().imprimir(this.toString());
     }
 
 

@@ -2,6 +2,7 @@ package Procesos.Casillas;
 
 import Procesos.Jugador;
 import Procesos.Tablero;
+import Juego.Juego;
 
 import java.util.ArrayList;
 
@@ -77,21 +78,21 @@ public final class Solar extends Propiedad {
      */
     public final void hipotecar() {
         if (edificios != null && !edificios.isEmpty()) {//Overrideamos esto en solar
-            System.out.println("Debes vender todos los edificios antes de hipotecar.");
+            Juego.getConsolaNormal().imprimir("Debes vender todos los edificios antes de hipotecar.");
             return;
         } else if (getHipotecado()) {
-            System.out.println("No puedes hipotecar una propiedad ya hipotecada.");
+            Juego.getConsolaNormal().imprimir("No puedes hipotecar una propiedad ya hipotecada.");
             return;
         }
         setHipotecado(true);
         getPropietario().addDinero(getPrecio() / 2);
-        System.out.println("Has hipotecado " + this + " por " + getPrecio() / 2 + "$");
+        Juego.getConsolaNormal().imprimir("Has hipotecado " + this + " por " + getPrecio() / 2 + "$");
     }
 
     //Edificios
     public final void construir(int tipo, Jugador jugador, boolean caida) {
         if (grupo.getPropietario() != getPropietario() && !caida || !jugador.equals(getPropietario())) { //Comprobación de propiedad
-            System.out.println("No puedes construir si no tienes todo el grupo on no has caído 2 veces en esta casilla...");
+            Juego.getConsolaNormal().imprimir("No puedes construir si no tienes todo el grupo on no has caído 2 veces en esta casilla...");
             return;
         }
 
@@ -105,7 +106,7 @@ public final class Solar extends Propiedad {
         }
 
         if (jugador.getDinero() < edificio.getPrecio()) { //Comprobación dinero
-            System.out.println("Dinero insuficiente, inténtalo otra vez cuando tengas más dinero");
+            Juego.getConsolaNormal().imprimir("Dinero insuficiente, inténtalo otra vez cuando tengas más dinero");
             return;
         }
 
@@ -124,12 +125,12 @@ public final class Solar extends Propiedad {
         switch (tipo) {
             case 0: //Mover para aquí el Tablero.contador...++
                 if (countc >= 4) { //Comprobación de casas/solar //HAY QUE MIRAR QUE DEJA CONSTRUIR MÁS CASAS DE LAS DEBIDAS CUANDO ESTÁ LLENO DE HOTELES
-                    System.out.println("Pedro Sánchez ha aprobado una ley de urbanismo que impide tener más de 4 casas por casilla ¡Vaya con estos socialistas!");
+                    Juego.getConsolaNormal().imprimir("Pedro Sánchez ha aprobado una ley de urbanismo que impide tener más de 4 casas por casilla ¡Vaya con estos socialistas!");
                 } else if (countgh >= grupo.getTam() && countgc >= grupo.getTam()) {
-                    System.out.println("El ministerio de igualdad prohibe que un solo grupo tenga tantos hoteles y casas a la vez, si quieres construir otra casa, debes vender algo antes o haber votado mejor...");
+                    Juego.getConsolaNormal().imprimir("El ministerio de igualdad prohibe que un solo grupo tenga tantos hoteles y casas a la vez, si quieres construir otra casa, debes vender algo antes o haber votado mejor...");
                 } else {
-                    System.out.println("¡OLE! Enhorabuena por la construcción de tu casa, ahora eres aún más especulador");
-                    System.out.println("Pagas " + edificio.getPrecio() + " por la construccion");
+                    Juego.getConsolaNormal().imprimir("¡OLE! Enhorabuena por la construcción de tu casa, ahora eres aún más especulador");
+                    Juego.getConsolaNormal().imprimir("Pagas " + edificio.getPrecio() + " por la construccion");
                     edificios.add(edificio);
                     jugador.pagar(edificio.getPrecio());
                     jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
@@ -139,32 +140,32 @@ public final class Solar extends Propiedad {
                 }
                 break;
             case 1: //Se cobra aunq no se construya el hotel Y NO SE COMPRUEBA QUE HAYA CASAS SUFICIENTES y se crea el edificio aunq no corresponda
-                if (countc < 4) System.out.println("Debes tener 4 casas en esta propiedad para construir un hotel...");
+                if (countc < 4) Juego.getConsolaNormal().imprimir("Debes tener 4 casas en esta propiedad para construir un hotel...");
                 else if (countgh >= grupo.getTam())
-                    System.out.println("No puedes construir más hoteles en esta propiedad");
+                    Juego.getConsolaNormal().imprimir("No puedes construir más hoteles en esta propiedad");
                 else {
-                    System.out.println("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
+                    Juego.getConsolaNormal().imprimir("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
                     construiccionInter(jugador, edificio);
                     Tablero.addChotel();
                     edificios.removeIf(ite -> ite instanceof Casa);
                 }
                 break;
             case 2:
-                if (countp >= 1) System.out.println("No puedes construir más piscinas en esta propiedad");
+                if (countp >= 1) Juego.getConsolaNormal().imprimir("No puedes construir más piscinas en esta propiedad");
                 else if (countc < 2 || counth < 1)
-                    System.out.println("Necesitas tener al menos 2 casas y 1 hotel para construir una piscina en esta propiedad");
+                    Juego.getConsolaNormal().imprimir("Necesitas tener al menos 2 casas y 1 hotel para construir una piscina en esta propiedad");
                 else {
-                    System.out.println("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
+                    Juego.getConsolaNormal().imprimir("Enhorabuena, estás colaborando con la gentrificación de tu ciudad");
                     construiccionInter(jugador, edificio);
                     Tablero.addCpiscina();
                 }
                 break;
             case 3:
-                if (countd >= 1) System.out.println("No puedes construir más pistas en esta propiedad");
+                if (countd >= 1) Juego.getConsolaNormal().imprimir("No puedes construir más pistas en esta propiedad");
                 else if (counth < 2)
-                    System.out.println("Necesitas tener al menos 2 hoteles para construir una piscina en esta propiedad");
+                    Juego.getConsolaNormal().imprimir("Necesitas tener al menos 2 hoteles para construir una piscina en esta propiedad");
                 else {
-                    System.out.println("Enhorabuena, estás colaborando mucho con la gentrificación de tu ciudad");
+                    Juego.getConsolaNormal().imprimir("Enhorabuena, estás colaborando mucho con la gentrificación de tu ciudad");
                     construiccionInter(jugador, edificio);
                     Tablero.addCdeporte();
                 }
@@ -173,7 +174,7 @@ public final class Solar extends Propiedad {
     }
 
     private void construiccionInter(Jugador jugador, Edificio edificio) {
-        System.out.println("Pagas " + edificio.getPrecio() + " por construir");
+        Juego.getConsolaNormal().imprimir("Pagas " + edificio.getPrecio() + " por construir");
         edificios.add(edificio);
         jugador.pagar(edificio.getPrecio());
         jugador.setFortuna(jugador.getFortuna() + 2 * edificio.getPrecio()); //en pagar lo quitamos y ahora tenemos q sumarlo
@@ -190,9 +191,9 @@ public final class Solar extends Propiedad {
     public final void venderEdificio(Edificio edificio, Jugador jugador) {
         if (getPropietario().equals(jugador) && !getHipotecado() && edificio != null) {
             jugador.addDinero(edificio.getPrecio() / 2);
-            System.out.println("Cobras " + edificio.getPrecio() + " por " + edificio.getIdentificador());
+            Juego.getConsolaNormal().imprimir("Cobras " + edificio.getPrecio() + " por " + edificio.getIdentificador());
             removeEdificio(edificio);
-        } else System.out.println("No se puede vender este edificio");
+        } else Juego.getConsolaNormal().imprimir("No se puede vender este edificio");
     }
 
     public final void venderEdificio(String sedificio, Jugador jugador) {
@@ -200,7 +201,7 @@ public final class Solar extends Propiedad {
         if (getPropietario().equals(jugador) && !getHipotecado() && edificio != null) {
             jugador.addDinero(edificio.getPrecio() / 2);
             removeEdificio(edificio);
-        } else System.out.println("No se puede vender este edificio");
+        } else Juego.getConsolaNormal().imprimir("No se puede vender este edificio");
     }
 
     public final Edificio getEdificio(String identificador) {
@@ -232,13 +233,13 @@ public final class Solar extends Propiedad {
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());
             grupo.setRentabilidad(grupo.getRentabilidad() + calcularAlquiler());
-            System.out.println("Pagas " + calcularAlquiler() + "$ por caer en " + getNombre());
+            Juego.getConsolaNormal().imprimir("Pagas " + calcularAlquiler() + "$ por caer en " + getNombre());
         } else if (getHipotecado()) {
-            System.out.println("Casilla hipotecada... No pagas alquiler :)");
+            Juego.getConsolaNormal().imprimir("Casilla hipotecada... No pagas alquiler :)");
         } else if (getPropietario().isBanca()) {
-            System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
+            Juego.getConsolaNormal().imprimir("Esta propiedad aun no tiene dueño, la puedes comprar.");
         } else if (getPropietario().equals(jugador)) {
-            System.out.println("Has caído en una casilla de tu propiedad, disfruta de tu estancia");
+            Juego.getConsolaNormal().imprimir("Has caído en una casilla de tu propiedad, disfruta de tu estancia");
         }
     }
 

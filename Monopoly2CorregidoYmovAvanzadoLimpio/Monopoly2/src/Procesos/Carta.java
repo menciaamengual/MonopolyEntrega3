@@ -58,7 +58,7 @@ public class Carta {
         return cartasCajaC;
     }
 
-    public List<Integer> getcartas(){
+    public List<Integer> getCartas(){
         return cartas;
     }
 
