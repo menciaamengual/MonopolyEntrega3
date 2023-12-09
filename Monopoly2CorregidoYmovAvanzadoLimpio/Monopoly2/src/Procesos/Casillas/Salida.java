@@ -1,5 +1,7 @@
 package Procesos.Casillas;
 
+import Juego.Juego;
+
 public final class Salida extends Especial {
 
     public Salida(int posicion, String nombre) {
@@ -7,6 +9,6 @@ public final class Salida extends Especial {
     }
 
     public void accionCasilla(){
-        System.out.println("Has caído en la salida!");
+        Juego.getConsolaNormal().imprimir("Has caído en la salida!");
     }
 }

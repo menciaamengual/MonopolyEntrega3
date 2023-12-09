@@ -1,5 +1,6 @@
 package Procesos.Casillas;
 
+import Juego.Juego;
 import Procesos.Jugador;
 
 public abstract class Propiedad extends Casilla {
@@ -51,26 +52,26 @@ public abstract class Propiedad extends Casilla {
      */
     public void hipotecar(){
         if (hipotecado){
-            System.out.println("No puedes hipotecar una propiedad ya hipotecada.");
+            Juego.getConsolaNormal().imprimir("No puedes hipotecar una propiedad ya hipotecada.");
             return;
         }
 
         hipotecado = true;
         propietario.addDinero(precio/2);
-        System.out.println("Has hipotecado "+ this+" por "+precio/2+"$");
+        Juego.getConsolaNormal().imprimir("Has hipotecado "+ this+" por "+precio/2+"$");
     }
     public void deshipotecar(){
         if (!hipotecado){
-            System.out.println("No puedes deshipotecar una propiedad no hipotecada.");
+            Juego.getConsolaNormal().imprimir("No puedes deshipotecar una propiedad no hipotecada.");
             return;
         }
         if (propietario.getDinero()<(int) ((-precio/2)*1.1)){
-            System.out.println("Dinero insuficiente para deshipotecar, necesitas "+(int) ((-precio/2)*1.1));
+            Juego.getConsolaNormal().imprimir("Dinero insuficiente para deshipotecar, necesitas "+(int) ((-precio/2)*1.1));
             return;
         }
         hipotecado = false;
         propietario.addDinero((int) ((-precio/2)*1.1)); //Add dinero negativo...
-        System.out.println("Has deshipotecado "+getNombre()+" por "+(int) ((precio/2)*1.1)+"$ ¡Qué bien!");
+        Juego.getConsolaNormal().imprimir("Has deshipotecado "+getNombre()+" por "+(int) ((precio/2)*1.1)+"$ ¡Qué bien!");
     }
 
     public boolean getHipotecado(){
@@ -94,7 +95,7 @@ public abstract class Propiedad extends Casilla {
             jugador.setDinero(jugador.getDinero() - getPrecio());
             jugador.setDineroInvertido(jugador.getDineroInvertido() + getPrecio());
             jugador.setFortuna(jugador.getFortuna()+ getPrecio());
-        } else System.out.println("Cuidado... Ya no tienes dinero suficiente para comprar esta casilla.");
+        } else Juego.getConsolaNormal().imprimir("Cuidado... Ya no tienes dinero suficiente para comprar esta casilla.");
     }
 
     /**
@@ -132,13 +133,13 @@ public abstract class Propiedad extends Casilla {
             setRentabilidad(rentabilidad + calcularAlquiler()); //edificios??
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());
-            System.out.println("Pagas " + calcularAlquiler() + "$ por caer en " + getNombre());
+            Juego.getConsolaNormal().imprimir("Pagas " + calcularAlquiler() + "$ por caer en " + getNombre());
         } else if (getHipotecado()) {
-            System.out.println("Casilla hipotecada... No pagas alquiler :)");
+            Juego.getConsolaNormal().imprimir("Casilla hipotecada... No pagas alquiler :)");
         } else if (propietario.isBanca()) {
-            System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
+            Juego.getConsolaNormal().imprimir("Esta propiedad aun no tiene dueño, la puedes comprar.");
         } else if (propietario.equals(jugador)) {
-            System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
+            Juego.getConsolaNormal().imprimir("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
         }
     }
 

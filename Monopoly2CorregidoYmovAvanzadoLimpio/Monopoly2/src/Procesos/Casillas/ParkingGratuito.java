@@ -1,5 +1,6 @@
 package Procesos.Casillas;
 
+import Juego.Juego;
 import Procesos.Jugador;
 
 public final class ParkingGratuito extends Accion {
@@ -13,7 +14,7 @@ public final class ParkingGratuito extends Accion {
     }
 
     public void accionCasilla(Jugador jugador){
-        System.out.println("Has caído en el Parking! cobras " + dineroAcumulado + "$.");
+        Juego.getConsolaNormal().imprimir("Has caído en el Parking! cobras " + dineroAcumulado + "$.");
         jugador.addDinero(dineroAcumulado);
         jugador.setPremiosInversionesOBote(jugador.getPremiosInversionesOBote() + dineroAcumulado);
         dineroAcumulado = 0;

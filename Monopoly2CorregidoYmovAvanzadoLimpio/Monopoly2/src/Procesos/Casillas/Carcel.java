@@ -1,5 +1,6 @@
 package Procesos.Casillas;
 
+import Juego.Juego;
 import Procesos.Jugador;
 
 public final class Carcel extends Especial {
@@ -9,7 +10,7 @@ public final class Carcel extends Especial {
     }
 
     public void accionCasilla(Jugador jugador){
-        if (!jugador.inCarcel()) System.out.println("Has caído en la cárcel, pero no pasa nada, solo es de visita...");
+        if (!jugador.inCarcel()) Juego.getConsolaNormal().imprimir("Has caído en la cárcel, pero no pasa nada, solo es de visita...");
     }
 }
 

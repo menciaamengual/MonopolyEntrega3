@@ -1,4 +1,5 @@
 package Procesos.Casillas;
+import  Juego.Juego;
 
 import Procesos.Dado;
 import Procesos.Jugador;
@@ -22,13 +23,13 @@ public class Servicios extends Propiedad {
             setRentabilidad(getRentabilidad() + calcularAlquiler(dado)); //edificios??
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler(dado));
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler(dado));
-            System.out.println("Pagas " + calcularAlquiler(dado) + "$ por caer en " + getNombre());
+            Juego.getConsolaNormal().imprimir("Pagas " + calcularAlquiler(dado) + "$ por caer en " + getNombre());
         } else if (getHipotecado()) {
-            System.out.println("Casilla hipotecada... No pagas alquiler :)");
+            Juego.getConsolaNormal().imprimir("Casilla hipotecada... No pagas alquiler :)");
         } else if (getPropietario().isBanca()) {
-            System.out.println("Esta propiedad aun no tiene dueño, la puedes comprar.");
+            Juego.getConsolaNormal().imprimir("Esta propiedad aun no tiene dueño, la puedes comprar.");
         } else if (getPropietario().equals(jugador)) {
-            System.out.println("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
+            Juego.getConsolaNormal().imprimir("Has caido en una casilla de tu propiedad, disfruta de tu estancia");
         }
     }
 }

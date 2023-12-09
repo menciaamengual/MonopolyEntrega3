@@ -5,7 +5,6 @@ import Procesos.Jugador;
 import Procesos.Tablero;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public final class Comunidad extends CasillasCarta {
 

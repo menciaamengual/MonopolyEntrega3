@@ -1,5 +1,6 @@
 package Procesos;
 
+import Juego.Juego;
 import Procesos.Casillas.*;
 
 import java.util.*;
@@ -224,7 +225,7 @@ public class Jugador {
                     ((Solar)ite).setPropietario(acreedor);
                 }
         pagar(dinero,acreedor);
-            System.out.println("Ahora estás en banca rota");
+        Juego.getConsolaNormal().imprimir("Ahora estás en banca rota");
             bancarrota = true;
             dinero = 0; //Solo por si acaso
     }
