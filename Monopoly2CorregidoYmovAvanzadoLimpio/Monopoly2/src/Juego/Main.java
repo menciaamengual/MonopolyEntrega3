@@ -3,8 +3,10 @@ package Juego;
 //Mateito, Cese y Mencía
 
 
+import Juego.Exceptions.LeerException;
+
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws LeerException {
         System.out.println("¡--Empieza el juego!--");
         //INICIALIZACIÓN
         Juego mono = new Juego();

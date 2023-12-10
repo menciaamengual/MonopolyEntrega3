@@ -2,6 +2,7 @@ package Juego;
 
 import java.util.*;
 
+import Juego.Exceptions.LeerException;
 import Procesos.*;
 import Procesos.Casillas.*;
 
@@ -99,7 +100,7 @@ public class Juego implements Comando{
      *
      * @param avance, movAvanzado
      */
-    private void avanzarCasillas(int avance, boolean movAvanzado) {
+    private void avanzarCasillas(int avance, boolean movAvanzado) throws LeerException {
         if (!movAvanzado) {
             if (avance >= 0) { // Funcionamiento normal (realmente podríamos poner "if getposicion+avance >0" pero así queda más legible)
                 if ((jugadorActual.getPosicion() + avance) > 39) {
@@ -192,7 +193,7 @@ public class Juego implements Comando{
         else jugadorActual = jugadores.get(jugadores.indexOf(jugadorActual) + 1);
     }
 
-    private void accionSuerte(int numCarta) {
+    private void accionSuerte(int numCarta) throws LeerException {
         consolaNormal.imprimir(carta.getCartasSuerte().get(numCarta));
         switch (numCarta) {
             case 0:
@@ -281,7 +282,7 @@ public class Juego implements Comando{
         }
     }
 
-    private void accionCajaC(int numCarta) {
+    private void accionCajaC(int numCarta) throws LeerException {
         consolaNormal.imprimir(carta.getCartasCajaC().get(numCarta));
         switch (numCarta) {
             case 0:
@@ -330,7 +331,7 @@ public class Juego implements Comando{
      * Llamamos a funciones internas para todos los tipos de casilla menos para cartas
      * En este caso necesitábamos acceder a demasiados métodos y atributos de juego para que tuviese sentido
      */
-    public void accionCasilla() {
+    public void accionCasilla() throws LeerException {
         contadorCasillas.get(jugadorActual).put(jugadorActual.getCasilla(tablero.getCasillas()), contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) + 1);
         Casilla casilla = jugadorActual.getCasilla(tablero.getCasillas());
         if (casilla instanceof Solar) ((Solar) casilla).accionCasilla(jugadorActual);
@@ -395,7 +396,7 @@ public class Juego implements Comando{
         consolaNormal.imprimir("Dinero: " + jugadorActual.getDinero());
         consolaNormal.imprimir("Posición: " + jugadorActual.getPosicion());
     }
-    public boolean tirarDados(boolean haTirado, String[] entradaPartida){
+    public boolean tirarDados(boolean haTirado, String[] entradaPartida) throws LeerException {
 // EN PRIMER LUGAR, COMPROBAMOS SI EL JUGADOR ESTÁ EN LA CÁRCEL Y EJECUTAMOS LAS ACCIONES CORRESPONDIENTES
         if (jugadorActual.inCarcel()) {
             if (jugadorActual.getTurnosCarcel() == 1) {
@@ -706,7 +707,7 @@ public class Juego implements Comando{
         }
         consolaNormal.imprimir("No se reconoce el grupo/color");
     }
-    public void salirCarcel(){
+    public void salirCarcel() throws LeerException {
         if (!jugadorActual.inCarcel()) {
             consolaNormal.imprimir("No estas en la cárcel...");
         } else {
@@ -716,7 +717,7 @@ public class Juego implements Comando{
             jugadorActual.setTurnosCarcel(0);
         }
     }
-    public void pagarDeuda(){
+    public void pagarDeuda() throws LeerException {
         if (pagando) {
             pagarAv(jugadorActual, pagoPendiente, cobradorPendiente);
         } else consolaNormal.imprimir("No tienes nada que pagar :D");
@@ -818,7 +819,7 @@ public class Juego implements Comando{
     }
 
 
-    public boolean menuAccion(boolean haTirado) { //Lee y llama a la acción indicada sobre el jugadorActual
+    public boolean menuAccion(boolean haTirado) throws LeerException { //Lee y llama a la acción indicada sobre el jugadorActual
         //Comprobaciones/actualizaciones en cada turno
         actualizarPropietarioCasillas();
         // System.out.printf("\nAuxiliar es %d\n", jugadorActual.getAuxMovAvanzado());
@@ -971,11 +972,11 @@ public class Juego implements Comando{
         return menuAccion(haTirado);
     }
 
-    private void pagarAv(Jugador pagador, int importe) {
+    private void pagarAv(Jugador pagador, int importe) throws LeerException {
         pagarAv(pagador, importe, banca);
     }
 
-    private void pagarAv(Jugador pagador, int importe, Jugador cobrador) {
+    private void pagarAv(Jugador pagador, int importe, Jugador cobrador) throws LeerException {
         while (!pagador.pagar(importe, cobrador) && !pagador.getBancarrota()) {
             consolaNormal.imprimir("No tienes suficiente para pagar tu deuda, debes vender o hipotecar propiedades... ");
             cobradorPendiente = cobrador;
@@ -989,7 +990,7 @@ public class Juego implements Comando{
     /**
      * Gestión de dinero insuficiente. Llama a menú solo con opciones de vender, hipotecar e información...
      */
-    private void gestInsuf() {
+    private void gestInsuf() throws LeerException {
         pagando = true;
         menuAccion(true);
     }
@@ -1007,19 +1008,19 @@ public class Juego implements Comando{
         String entradaString;
 
         do { //J1
-            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: ");
+            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");
         } while (!entradaString.contains("crear jugador"));
         darAlta();
         consolaNormal.imprimir("¡Primer jugador registrado!");
         do { //J2
-            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: ");;
+            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");;
         } while (!entradaString.contains("crear jugador"));
         darAlta();
         consolaNormal.imprimir("¡Segundo jugador registrado!");
 
         do {
             do { //Jx
-                entradaString = consolaNormal.leer("Ahora puedes introducir 'crear jugador' para darte de alta o 'empezar juego' para comenzar a jugar: ");
+                entradaString = consolaNormal.leer("Ahora puedes introducir 'crear jugador' para darte de alta o 'empezar juego' para comenzar a jugar: \n");
             } while (!entradaString.contains("crear jugador") && !entradaString.contains("empezar juego"));
 
             if (entradaString.contains("crear jugador")) {

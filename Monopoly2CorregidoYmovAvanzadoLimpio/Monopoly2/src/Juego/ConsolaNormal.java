@@ -1,5 +1,8 @@
 package Juego;
 
+import Juego.Exceptions.JuegoException;
+import Juego.Exceptions.LeerException;
+
 import java.util.Scanner;
 
 public class ConsolaNormal implements Consola{
@@ -18,14 +21,19 @@ public class ConsolaNormal implements Consola{
 
     @Override
     public String[] leerFragmentado(String descripcion) {
-        System.out.println(descripcion);
+        System.out.print(descripcion);
         Scanner entrada = new Scanner(System.in);
         String entradaString = entrada.nextLine();
         return entradaString.split(" ");
     }
-    public int leerInt (String descripcion){
-        System.out.println(descripcion);
-        Scanner entrada = new Scanner(System.in);
-        return entrada.nextInt();
+    @Override
+    public int leerInt (String descripcion) throws LeerException{
+        try {
+            System.out.println(descripcion);
+            Scanner entrada = new Scanner(System.in);
+            return entrada.nextInt();
+        }catch (Exception e){
+            throw new LeerException("Solo se aceptan números enteros.");
+        }
     }
 }
