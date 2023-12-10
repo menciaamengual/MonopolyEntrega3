@@ -37,6 +37,7 @@ public class Juego implements Comando{
 
     //CONSTRUCTORES
     public Juego() {
+        consolaNormal = new ConsolaNormal();
         jugadores = new ArrayList<>(6); //La banca se maneja como un jugador externo (banca).
         banca = new Jugador();
         pSalida = Grupo.mediaSolares();
