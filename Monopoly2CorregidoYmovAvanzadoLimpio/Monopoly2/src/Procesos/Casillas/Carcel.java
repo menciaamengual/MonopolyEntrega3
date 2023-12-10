@@ -10,7 +10,7 @@ public final class Carcel extends Especial {
     }
 
     public void accionCasilla(Jugador jugador){
-        if (!jugador.inCarcel()) Juego.getConsolaNormal().imprimir("Has caído en la cárcel, pero no pasa nada, solo es de visita...");
+        if (!jugador.getAvatar().inCarcel()) Juego.getConsolaNormal().imprimir("Has caído en la cárcel, pero no pasa nada, solo es de visita...");
     }
 }
 
