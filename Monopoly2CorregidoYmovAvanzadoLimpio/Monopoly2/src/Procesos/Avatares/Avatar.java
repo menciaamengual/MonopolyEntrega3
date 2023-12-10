@@ -20,9 +20,10 @@ public abstract class Avatar {
     // 2: Está en la cárcel, y tiene UNA oportunidad para tirar dados, sacar dobles y salir
     // 3: Está en la cárcel, y tiene DOS oportunidades para tirar dados, sacar dobles y salir
     // 4: Está en la cárcel, y tiene TRES oportunidades para tirar dados, sacar dobles y salir
-    private Jugador jugador; // El jugador que lleva el avatar
+    // private Jugador jugador; // El jugador que lleva el avatar
     private boolean movAvanzadoActivado;
     private int auxMovAvanzado;
+    private Jugador jugador; // El jugador al que pertenece el avatar
 
 
 

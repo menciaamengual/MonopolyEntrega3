@@ -23,7 +23,7 @@ public abstract class Casilla{
     String StringAvatares(){
         StringBuilder avs = new StringBuilder();
         for (Jugador jugador:ocupantes){
-            avs.append("&").append(jugador.getAvatar());
+            avs.append("&").append(jugador.getAvatar().getIdentificador());
         }
         return avs.toString();
     }

@@ -59,18 +59,23 @@ public class Juego implements Comando{
         do {
             inputTipo = consolaNormal.leer("Elige tipo de ficha (coche o pelota):");
             if (inputTipo.equalsIgnoreCase("coche")) {
-                jugadores.add(new Jugador(dineroInicial, miNombre, miAvatar, new Coche(miAvatar)));
+                Coche coche = new Coche(miAvatar);
+                Jugador jugador = new Jugador(dineroInicial, miNombre, miAvatar, coche);
+                coche.setJugador(jugador); // Establecer la relación inversa
+                jugadores.add(jugador);
                 break;
             }
             else if (inputTipo.equalsIgnoreCase("pelota")) {
-                jugadores.add(new Jugador(dineroInicial, miNombre, miAvatar, new Pelota(miAvatar)));
+                Pelota pelota = new Pelota(miAvatar);
+                Jugador jugador = new Jugador(dineroInicial, miNombre, miAvatar, pelota);
+                pelota.setJugador(jugador); // Establecer la relación inversa
+                jugadores.add(jugador);
                 break;
             }
             else {
                 consolaNormal.imprimir("Tipo no válido. Por favor, introduce coche o pelota.");
             }
         } while (true);
-        // jugadores.add(new Jugador(dineroInicial, miNombre, miAvatar, tipo));
         for (Jugador ite : jugadores)
             ite.setFortuna(dineroInicial);
     }
@@ -379,6 +384,7 @@ public class Juego implements Comando{
                     tablero.imprimirTablero();
                 return true;
             }
+
             // Si el Movimiento Avanzado está activado...
             if (jugadorActual.getAvatar().getMovAvanzadoActivado()) {
                 if (jugadorActual.getAvatar().getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
@@ -649,10 +655,13 @@ public class Juego implements Comando{
                     jugadorActual.getAvatar().setAuxMovAvanzado(999);
                     consolaNormal.imprimir("¡Motor reparado! En el siguiente turno podrás moverte.");
                 } else{
-                    Juego.getConsolaNormal().imprimir("\nTurnos restantes para poder moverte: %d\n" + -jugadorActual.getAvatar().getAuxMovAvanzado());
+                    Juego.getConsolaNormal().imprimir("\nTurnos restantes para poder moverte: \n" + -jugadorActual.getAvatar().getAuxMovAvanzado());
                     ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(true);
                     // jugadorActual.setAuxMovAvanzado(999);
-                    ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(true);
+                    if (jugadorActual.getAvatar().getTipoMov() == 1) {
+                        Coche cocheActual = (Coche) jugadorActual.getAvatar();
+                        cocheActual.setPuedeComprarPropiedades(true);
+                    }
                     nextJugador();
                     consolaNormal.imprimir("Turno de: " + jugadorActual.getNombre());
                     c = true;
@@ -665,7 +674,10 @@ public class Juego implements Comando{
             if (!(jugadorActual.getAvatar().getTipoMov() == 1 && jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getAuxMovAvanzado() < 0)) {
                 jugadorActual.getAvatar().setAuxMovAvanzado(999);
             }
-            ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(true);
+            if (jugadorActual.getAvatar().getTipoMov() == 1) {
+                Coche cocheActual = (Coche) jugadorActual.getAvatar();
+                cocheActual.setPuedeComprarPropiedades(true);
+            }
                         /* if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0){
                             hayBug=true;
                         } */
@@ -678,14 +690,6 @@ public class Juego implements Comando{
         return c;
     }
 
-    public void acabarParada(){
-        if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0 && jugadorActual.getAvatar().getAuxMovAvanzado() == 0) {
-            consolaNormal.imprimir("Ya has pasado por todas tus paradas.");
-        } else if (!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1)) {
-            consolaNormal.imprimir("¿Paradas? Bro think he pelota con movAvanzadoActivado");
-        } else if (!(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0))
-            tablero.imprimirTablero();
-    }
     public void cambiarMovimiento(boolean haTirado) {
         if (haTirado) {
             consolaNormal.imprimir("¡Solo puedes cambiar de movimiento al inicio de tu turno!");
@@ -730,7 +734,7 @@ public class Juego implements Comando{
     public boolean menuAccion(boolean haTirado) { //Lee y llama a la acción indicada sobre el jugadorActual
         //Comprobaciones/actualizaciones en cada turno
         actualizarPropietarioCasillas();
-        // System.out.printf("\nAuxiliar es %d\n", jugadorActual.getAuxMovAvanzado());
+        // System.out.printf("\nAuxiliar es %d\n", jugadorActual.getAvatar().getAuxMovAvanzado());
 
         String[] entradaPartida = consolaNormal.leerFragmentado("Introduce una acción. Puedes escribir \"ayuda\" para obtener un listado de acciones.\n $>");
 
@@ -839,7 +843,16 @@ public class Juego implements Comando{
                         return true;
                 }
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("parada")) {
-                    acabarParada();
+                    if(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0 && jugadorActual.getAvatar().getAuxMovAvanzado()==0){
+                        System.out.println("Ya has pasado por todas tus paradas.");
+                        break;
+                    }
+                    else if(!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==1)){
+                        System.out.println("¿Paradas? Bro think he pelota con movAvanzadoActivado");
+                        break;
+                    }
+                    else if (!(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0)) tablero.imprimirTablero();
+                    return haTirado;
                 }
                 break;
             case "bancarrota":
@@ -921,7 +934,7 @@ public class Juego implements Comando{
         darAlta();
         consolaNormal.imprimir("¡Primer jugador registrado!");
         do { //J2
-            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: ");;
+            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: ");
         } while (!entradaString.contains("crear jugador"));
         darAlta();
         consolaNormal.imprimir("¡Segundo jugador registrado!");
