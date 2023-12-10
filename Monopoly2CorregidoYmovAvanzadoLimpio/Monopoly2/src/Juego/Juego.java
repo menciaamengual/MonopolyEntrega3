@@ -49,6 +49,7 @@ public class Juego implements Comando{
         pagando = false;
         cobradorPendiente = banca;
         pagoPendiente = 0;
+        consolaNormal = new ConsolaNormal();
     }
 
     //METODOS PUBLICOS
