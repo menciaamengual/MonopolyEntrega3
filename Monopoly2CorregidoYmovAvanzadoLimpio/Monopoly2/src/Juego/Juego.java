@@ -379,12 +379,13 @@ public class Juego implements Comando{
      * Realiza la transacción correspondiente entre el jugador y la banca, y mueve la propiedad de la Procesos.Casilla, y del grupo en caso de que corresponda
      */
     public void comprarCasilla() { //todo garantizar que se añade a propie
+        Propiedad casilla;
         Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
         if (!(casillac instanceof Propiedad)) { //RARO
             consolaNormal.imprimir("No puedes comprar esta casilla");
             return;
         }
-        Propiedad casilla = (Propiedad) casillac;
+        casilla = (Propiedad) casillac;
         if (jugadorActual.getDinero() >= casilla.getPrecio()) {
             casilla.getPropietario().addDinero(casilla.getPrecio());
             casilla.setPropietario(jugadorActual);
