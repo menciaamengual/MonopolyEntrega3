@@ -1,6 +1,5 @@
 package Juego;
 
-import Juego.Exceptions.JuegoException;
 import Juego.Exceptions.LeerException;
 
 import java.util.Scanner;

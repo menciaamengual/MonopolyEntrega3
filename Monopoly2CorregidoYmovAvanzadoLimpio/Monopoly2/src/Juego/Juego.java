@@ -575,7 +575,7 @@ public class Juego implements Comando{
         }
     }
     public void edificar(String[] entradaPartida){
-        boolean caidas = false;
+        boolean caidas;
         caidas = contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) == 2;
 
         if (entradaPartida.length > 1)
@@ -1039,12 +1039,11 @@ public class Juego implements Comando{
                 turnoPruebas = true;
                 break;
             }
-        } while (!entradaString.contains("crear jugador"));;
+        } while (!entradaString.contains("crear jugador"));
         consolaNormal.imprimir("¡Primer jugador registrado!");
         if (!turnoPruebas) {
             do { //J2
                 entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");
-                ;
             } while (!entradaString.contains("crear jugador"));
             darAlta();
             consolaNormal.imprimir("¡Segundo jugador registrado!");
