@@ -10,7 +10,7 @@ public class Carta {
 
     //CONTRUCTORES
     public Carta(int posicion){
-        if (posicion==7 || posicion ==22 || posicion ==36)
+        if (posicion==7 ||posicion == 200 || posicion ==22 || posicion ==36)
             this.tipo=0;
         if (posicion==2 || posicion ==17 || posicion==33)
             this.tipo=1;
