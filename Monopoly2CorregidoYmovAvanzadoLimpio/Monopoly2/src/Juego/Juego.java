@@ -352,18 +352,10 @@ public class Juego implements Comando{
         else if (casilla instanceof Carcel) ((Carcel) casilla).accionCasilla(jugadorActual);
 
         else if (casilla instanceof Comunidad || casilla instanceof Suerte) {
-            int indice = 0;
+            int indice;
             carta = new Carta(jugadorActual.getPosicion());
             carta.barajar();
-            boolean f;
-            do{
-                try {
-                    f = false;
-                    indice = consolaNormal.leerInt("Elige una carta (introduciendo un numero del 1 al 6)");
-                }catch(LeerException le){
-                    f = true;
-                }
-            }while(f);
+            indice = consolaNormal.leerInt("Elige una carta (introduciendo un numero del 1 al 6)");
             int numCarta = (carta.getCartas().get(indice - 1));
             if (carta.getTipo() == 0)
                 accionSuerte(numCarta);

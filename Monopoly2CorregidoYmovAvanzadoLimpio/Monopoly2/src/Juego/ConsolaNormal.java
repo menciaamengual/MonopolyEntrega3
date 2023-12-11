@@ -12,7 +12,7 @@ public class ConsolaNormal implements Consola{
     }
 
     @Override
-    public String leer(String descripcion) {
+    public String leer(String descripcion){
         System.out.print(descripcion);
         Scanner entrada = new Scanner(System.in);
         return entrada.nextLine();
@@ -26,7 +26,8 @@ public class ConsolaNormal implements Consola{
         return entradaString.split(" ");
     }
     @Override
-    public int leerInt (String descripcion) throws LeerException{
+    public int leerInt (String descripcion){
+        try {
             try {
                 System.out.println(descripcion);
                 Scanner entrada = new Scanner(System.in);
@@ -34,5 +35,8 @@ public class ConsolaNormal implements Consola{
             } catch (Exception e) {
                 throw new LeerException("Solo se aceptan números enteros.");
             }
+        }catch(LeerException le){
+            return leerInt(descripcion);
+        }
     }
 }
