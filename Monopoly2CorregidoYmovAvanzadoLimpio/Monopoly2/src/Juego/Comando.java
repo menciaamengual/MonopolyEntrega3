@@ -22,7 +22,6 @@ public interface Comando {
     void salirCarcel();
     void pagarDeuda();
     boolean acabarTurno(boolean haTirado);
-    void acabarParada();
     void cambiarMovimiento(boolean haTirado);
     void estadisticas();
     void estadisticasJugador(String[] entradaPartida);

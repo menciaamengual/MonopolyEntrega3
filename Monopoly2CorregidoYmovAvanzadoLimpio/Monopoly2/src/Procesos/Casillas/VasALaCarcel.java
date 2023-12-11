@@ -16,7 +16,7 @@ public final class VasALaCarcel extends Accion {
     public void accionCasilla(Jugador jugador, ArrayList<Casilla> casillas, Dado dado) {
         jugador.setVecesEnLaCarcel(jugador.getVecesEnLaCarcel() + 1);
         Juego.getConsolaNormal().imprimir("Vaya! Vas a la cárcel...");
-        jugador.enviarCarcel(casillas);
+        jugador.getAvatar().enviarCarcel(casillas);
         dado.tirarDados(1, 2);//Ponemos valores arbitrarios (pero distintos), así NUNCA entras en la cárcel con dobles y se acaba el turno
     }
 }

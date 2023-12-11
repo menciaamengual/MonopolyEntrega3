@@ -4,6 +4,7 @@ import java.util.*;
 
 import Procesos.*;
 import Procesos.Casillas.*;
+import Procesos.Avatares.*;
 
 public class Juego implements Comando{
     private static ConsolaNormal consolaNormal;
@@ -56,21 +57,27 @@ public class Juego implements Comando{
     public void darAlta() {
         String miNombre = consolaNormal.leer("Introduce tu nombre, Jugador " + (jugadores.size() + 1) + " : ");
         char miAvatar = generaAvatar();
-
-        int tipo;
         String inputTipo;
         do {
-            inputTipo = consolaNormal.leer("Elige tipo de ficha (coche o pelota):");
-            if (inputTipo.equalsIgnoreCase("coche"))
-                tipo = 1;
-             else if (inputTipo.equalsIgnoreCase("pelota"))
-                tipo = 0;
-             else {
-                consolaNormal.imprimir("Tipo no válido. Por favor, introduce coche o pelota.");
-                tipo = -1; // Para que el bucle se ejecute otra vez hasta que el usuario escoja una opción válida
+            inputTipo = consolaNormal.leer("Elige tipo de ficha (coche o pelota): ");
+            if (inputTipo.equalsIgnoreCase("coche")) {
+                Coche coche = new Coche(miAvatar);
+                Jugador jugador = new Jugador(dineroInicial, miNombre, coche);
+                coche.setJugador(jugador); // Establecer la relación inversa
+                jugadores.add(jugador);
+                break;
             }
-        } while (tipo == -1);
-        jugadores.add(new Jugador(dineroInicial, miNombre, miAvatar, tipo));
+            else if (inputTipo.equalsIgnoreCase("pelota")) {
+                Pelota pelota = new Pelota(miAvatar);
+                Jugador jugador = new Jugador(dineroInicial, miNombre, pelota);
+                pelota.setJugador(jugador); // Establecer la relación inversa
+                jugadores.add(jugador);
+                break;
+            }
+            else {
+                consolaNormal.imprimir("Tipo no válido. Por favor, introduce coche o pelota.");
+            }
+        } while (true);
         for (Jugador ite : jugadores)
             ite.setFortuna(dineroInicial);
     }
@@ -85,6 +92,11 @@ public class Juego implements Comando{
     }
 
     //GETTERS
+
+    public int getPSalida(){
+        return pSalida;
+    }
+
     public Tablero getTablero() {
         return tablero;
     }
@@ -102,45 +114,45 @@ public class Juego implements Comando{
     private void avanzarCasillas(int avance, boolean movAvanzado) {
         if (!movAvanzado) {
             if (avance >= 0) { // Funcionamiento normal (realmente podríamos poner "if getposicion+avance >0" pero así queda más legible)
-                if ((jugadorActual.getPosicion() + avance) > 39) {
+                if ((jugadorActual.getAvatar().getPosicion() + avance) > 39) {
                     addVuelta(jugadorActual);
                     consolaNormal.imprimir("Pasas por la casilla de salida y cobras " + pSalida + "$");
                     jugadorActual.setDinero(jugadorActual.getDinero() + pSalida);
-                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance) - 40, tablero.getCasillas());
+                    jugadorActual.getAvatar().setPosicion((jugadorActual.getAvatar().getPosicion() + avance) - 40, tablero.getCasillas());
                 } else {
-                    jugadorActual.setPosicion(jugadorActual.getPosicion() + avance, tablero.getCasillas());
+                    jugadorActual.getAvatar().setPosicion(jugadorActual.getAvatar().getPosicion() + avance, tablero.getCasillas());
                 }
             } else { // Avance negativo
-                if ((jugadorActual.getPosicion() + avance) <= 0) { // Si se pasa por la casilla de salida
+                if ((jugadorActual.getAvatar().getPosicion() + avance) <= 0) { // Si se pasa por la casilla de salida
                     jugadorActual.setVueltas(jugadorActual.getVueltas() - 1); // Se resta una vuelta
                     consolaNormal.imprimir("Pasas por la casilla de salida en sentido contrario y pagas " + pSalida + "$");
                     jugadorActual.pagar(pSalida, banca);
-                    jugadorActual.setPosicion((jugadorActual.getPosicion() + avance) + 40, tablero.getCasillas());
+                    jugadorActual.getAvatar().setPosicion((jugadorActual.getAvatar().getPosicion() + avance) + 40, tablero.getCasillas());
                 } else {
-                    jugadorActual.setPosicion(jugadorActual.getPosicion() + avance, tablero.getCasillas());
+                    jugadorActual.getAvatar().setPosicion(jugadorActual.getAvatar().getPosicion() + avance, tablero.getCasillas());
                 }
             }
         } else { // Movimiento avanzado activado
-            if (jugadorActual.getTipoMov() == 0) { // PELOTA
-                jugadorActual.setAuxMovAvanzado(1); // Indica que el turno aún está en curso
+            if (jugadorActual.getAvatar().getTipoMov() == 0) { // PELOTA
+                jugadorActual.getAvatar().setAuxMovAvanzado(1); // Indica que el turno aún está en curso
                 if (avance > 4) {
                     avanzarCasillas(4, false);
-                    int aux = jugadorActual.getPosicion(); // guardamos la posición tras avanzar 4 casillas para comprobar paridades
+                    int aux = jugadorActual.getAvatar().getPosicion(); // guardamos la posición tras avanzar 4 casillas para comprobar paridades
                     for (int i = 5; i <= avance; i++) {
                         avanzarCasillas(1, false); // avanzamos una casilla
-                        if (jugadorActual.getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
+                        if (jugadorActual.getAvatar().getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
                             return;
                         }
                         if (i == avance) {
-                            jugadorActual.setAuxMovAvanzado(0);
+                            jugadorActual.getAvatar().setAuxMovAvanzado(0);
                             consolaNormal.imprimir("Ya has pasado por todas tus paradas.");
                             return;
                         }
-                        if ((jugadorActual.getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
+                        if ((jugadorActual.getAvatar().getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
                             consolaNormal.imprimir("¡Momento de pararse! Introduce \"acabar parada\" para avanzar a la siguiente casilla");
                             tablero.imprimirTablero();
                             accionCasilla();
-                            if (jugadorActual.inCarcel()) {
+                            if (jugadorActual.getAvatar().inCarcel()) {
                                 break;
                             }
                             menuAccion(true);
@@ -149,22 +161,22 @@ public class Juego implements Comando{
                         // Si es par, no se hace nada.
                     }
                 } else {
-                    int aux = jugadorActual.getPosicion(); // guardamos la posición para comprobar paridades
+                    int aux = jugadorActual.getAvatar().getPosicion(); // guardamos la posición para comprobar paridades
                     for (int i = avance; i > 0; i--) {
                         avanzarCasillas(-1, false);
-                        if (jugadorActual.getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
+                        if (jugadorActual.getAvatar().getPosicion() == 30) { // Si cae en la casilla de ir a la cárcel, se acaba la función. Recordemos que accionCasilla y menuAccion de la última parada/casilla se ejecutan fuera de aquí.
                             return;
                         }
                         if (i == 1) { // Si es la última parada
-                            jugadorActual.setAuxMovAvanzado(0);
+                            jugadorActual.getAvatar().setAuxMovAvanzado(0);
                             consolaNormal.imprimir("Ya has pasado por todas tus paradas.");
                             return;
                         }
-                        if ((jugadorActual.getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
+                        if ((jugadorActual.getAvatar().getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
                             consolaNormal.imprimir("¡Momentito de pararse! Introduce \"acabar parada\" para ir a la próxima casilla");
                             tablero.imprimirTablero();
                             accionCasilla();
-                            if (jugadorActual.inCarcel()) {
+                            if (jugadorActual.getAvatar().inCarcel()) {
                                 break;
                             }
                             menuAccion(true);
@@ -172,14 +184,14 @@ public class Juego implements Comando{
                         // Si es par, no se hace nada.
                     }
                 }
-            } else if (jugadorActual.getTipoMov() == 1) { // COCHE
+            } else if (jugadorActual.getAvatar().getTipoMov() == 1) { // COCHE
                 if (avance >= 4) {
                     avanzarCasillas(avance, false);
                     consolaNormal.imprimir("Puedes tirar los dados hasta 3 veces más mientras saques más de un 3.");
-                    jugadorActual.setAuxMovAvanzado(3);
+                    jugadorActual.getAvatar().setAuxMovAvanzado(3);
                 } else {
                     avanzarCasillas(-avance, false);
-                    jugadorActual.setAuxMovAvanzado(-3); // Los números negativos sin el "-" indicarán los turnos restantes sin poder tirar (em el turno actual, por eso se inicializa en -3 y no en -2. al acabar el turno se suma 1, con lo que al acabar el turno en el que se estropea el motor tienes -3+1 = (-)2 turnos más sin tirar)
+                    jugadorActual.getAvatar().setAuxMovAvanzado(-3); // Los números negativos sin el "-" indicarán los turnos restantes sin poder tirar (em el turno actual, por eso se inicializa en -3 y no en -2. al acabar el turno se suma 1, con lo que al acabar el turno en el que se estropea el motor tienes -3+1 = (-)2 turnos más sin tirar)
                     consolaNormal.imprimir("Se te ha estropeado el motor y deberás estar dos turnos sin tirar mientras se arregla.");
                 }
             }
@@ -235,14 +247,14 @@ public class Juego implements Comando{
                 break;
 
             case 3:
-                jugadorActual.setPosicion((jugadorActual.getPosicion() - 3), tablero.getCasillas());
+                jugadorActual.getAvatar().setPosicion((jugadorActual.getAvatar().getPosicion() - 3), tablero.getCasillas());
                 tablero.imprimirTablero();
                 accionCasilla();
                 break;
 
             case 4:
                 int pTCercano = 5;
-                switch (jugadorActual.getPosicion()){
+                switch (jugadorActual.getAvatar().getPosicion()){
                     case 7:
                         pTCercano = 15;
                         break;
@@ -257,7 +269,7 @@ public class Juego implements Comando{
                         addVuelta(jugadorActual);
                         break;
                 }
-                jugadorActual.setPosicion(pTCercano, tablero.getCasillas());
+                jugadorActual.getAvatar().setPosicion(pTCercano, tablero.getCasillas());
                 tablero.imprimirTablero();
                 Propiedad tCercano;
                 if (tablero.getCasilla(pTCercano) instanceof Transporte)  tCercano = (Propiedad) tablero.getCasilla(pTCercano);
@@ -298,19 +310,19 @@ public class Juego implements Comando{
                 break;
 
             case 1:
-                jugadorActual.setPosicion(30, tablero.getCasillas());
+                jugadorActual.getAvatar().setPosicion(30, tablero.getCasillas());
                 accionCasilla();
                 break;
 
             case 2:
-                jugadorActual.setPosicion(0, tablero.getCasillas());
+                jugadorActual.getAvatar().setPosicion(0, tablero.getCasillas());
                 jugadorActual.addDinero(pSalida);
                 jugadorActual.setPasarPorCasillaDeSalida(jugadorActual.getPasarPorCasillaDeSalida() + pSalida);
                 addVuelta(jugadorActual);
                 break;
 
             case 3:
-                jugadorActual.setPosicion(34, tablero.getCasillas());
+                jugadorActual.getAvatar().setPosicion(34, tablero.getCasillas());
                 accionCasilla(); //un poco cutre pq no hace falta hacer la comprobacion de salida
                 break;
 
@@ -343,7 +355,7 @@ public class Juego implements Comando{
         else if (casilla instanceof Carcel) ((Carcel) casilla).accionCasilla(jugadorActual);
 
         else if (casilla instanceof Comunidad || casilla instanceof Suerte) {
-            carta = new Carta(jugadorActual.getPosicion());
+            carta = new Carta(jugadorActual.getAvatar().getPosicion());
             carta.barajar();
             int indice = consolaNormal.leerInt("Elige una carta (introduciendo un numero del 1 al 6)");
             int numCarta = (carta.getCartas().get(indice - 1));
@@ -393,17 +405,17 @@ public class Juego implements Comando{
         consolaNormal.imprimir("Nombre: " + jugadorActual.getNombre());
         consolaNormal.imprimir("Avatar: " + jugadorActual.getAvatar());
         consolaNormal.imprimir("Dinero: " + jugadorActual.getDinero());
-        consolaNormal.imprimir("Posición: " + jugadorActual.getPosicion());
+        consolaNormal.imprimir("Posición: " + jugadorActual.getAvatar().getPosicion());
     }
     public boolean tirarDados(boolean haTirado, String[] entradaPartida){
 // EN PRIMER LUGAR, COMPROBAMOS SI EL JUGADOR ESTÁ EN LA CÁRCEL Y EJECUTAMOS LAS ACCIONES CORRESPONDIENTES
-        if (jugadorActual.inCarcel()) {
-            if (jugadorActual.getTurnosCarcel() == 1) {
+        if (jugadorActual.getAvatar().inCarcel()) {
+            if (jugadorActual.getAvatar().getTurnosCarcel() == 1) {
                 //En el último turno de carcel, tiene que pagar, y no juega, no puede tirar más veces
                 consolaNormal.imprimir("Ya no puedes tirar más veces los dados :(");
             }
-            else if (jugadorActual.getTurnosCarcel() > 1) {
-                consolaNormal.imprimir("Te quedan " + (jugadorActual.getTurnosCarcel() - 1) + " oportunidades para salir de la cárcel tirando los dados. ¡Adelante!");
+            else if (jugadorActual.getAvatar().getTurnosCarcel() > 1) {
+                consolaNormal.imprimir("Te quedan " + (jugadorActual.getAvatar().getTurnosCarcel() - 1) + " oportunidades para salir de la cárcel tirando los dados. ¡Adelante!");
                 if (entradaPartida.length == 5 && entradaPartida[2].equals("trucados")) {
                     dado.tirarDados(Integer.parseInt(entradaPartida[3]), Integer.parseInt(entradaPartida[4]));
                     jugadorActual.addVecesDados();
@@ -416,14 +428,14 @@ public class Juego implements Comando{
                     return true;
                 } else {
                     consolaNormal.imprimir("Oh no... No has sacado dados dobles. Te quedas en la cárcel.");
-                    jugadorActual.setTurnosCarcel(jugadorActual.getTurnosCarcel() - 1);
+                    jugadorActual.getAvatar().setTurnosCarcel(jugadorActual.getAvatar().getTurnosCarcel() - 1);
                     return true;
                 }
             }
         } else { // SI NO ESTÁ EN LA CÁRCEL...
 
             // 1. NO LE DEJAMOS TIRAR SI TIENE EL MOTOR ROTO
-            if (jugadorActual.getTipoMov() == 1 && jugadorActual.getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
+            if (jugadorActual.getAvatar().getTipoMov() == 1 && jugadorActual.getAvatar().getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
                 consolaNormal.imprimir("Tu motor sigue roto. ¡No puedes moverte!");
                 return true;
             }
@@ -449,13 +461,13 @@ public class Juego implements Comando{
             // REALIZAMOS LA ACCIÓN CORRESPONDIENTE SI SE SACA DOBLES:
 
             if (dado.areEqual()) {
-                if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
-                    if (jugadorActual.getAuxMovAvanzado() == 0)
+                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
+                    if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0)
                         consolaNormal.imprimir("Has sacado dobles! Puedes volver a tirar.");
                 } else { // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
                     consolaNormal.imprimir("Has sacado dobles! Puedes volver a tirar.");
                 }
-                if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 999) {
+                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0 && jugadorActual.getAvatar().getAuxMovAvanzado() == 999) {
                     consolaNormal.imprimir("Como el movimiento avanzado está activado, la tirada extra de dados será cuando pases por todas las paradas.");
                 }
             }
@@ -465,31 +477,34 @@ public class Juego implements Comando{
             // Primero, mandamos a la cárcel si corresponde
             if (dado.getC() == 3) {
                 consolaNormal.imprimir("Has sacado dados dobles 3 veces seguidas. ¡Vas a la cárcel! ");
-                jugadorActual.enviarCarcel(tablero.getCasillas());
-                if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1))
+                jugadorActual.getAvatar().enviarCarcel(tablero.getCasillas());
+                if (!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1))
                     tablero.imprimirTablero();
                 return true;
             }
+
             // Si el Movimiento Avanzado está activado...
-            if (jugadorActual.getMovAvanzadoActivado()) {
-                if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
-                    // Si es el primer turno
-                    // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
-                    avanzarCasillas(dado.getSuma(), jugadorActual.getAuxMovAvanzado() == 999);
+            if (jugadorActual.getAvatar().getMovAvanzadoActivado()) {
+                if (jugadorActual.getAvatar().getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                    if(jugadorActual.getAvatar().getAuxMovAvanzado()==999){ // Si es el primer turno
+                        jugadorActual.getAvatar().avanzarCasillasAvanzado(this, tablero, dado.getSuma(), jugadorActual, banca);
+                    }else{ // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
+                        jugadorActual.getAvatar().avanzarCasillasSimple(this, tablero, dado.getSuma(), jugadorActual, banca);
+                    }
                 }
-                if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                    if (jugadorActual.getAuxMovAvanzado() == 999) { // Si es el primer turno
-                        avanzarCasillas(dado.getSuma(), true);
+                if (jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                    if (jugadorActual.getAvatar().getAuxMovAvanzado() == 999) { // Si es el primer turno
+                        jugadorActual.getAvatar().avanzarCasillasAvanzado(this, tablero, dado.getSuma(), jugadorActual, banca);
                     } else { // Si no es el primer turno...
-                        if (jugadorActual.getAuxMovAvanzado() == 0) { // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
-                            avanzarCasillas(dado.getSuma(), false);
+                        if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0) { // Si ya acabó sus tiradas extra y puede tirar, significa que ha sacado dobles. Nos movemos en modo simple sin restar auxMovAvanzado.
+                            jugadorActual.getAvatar().avanzarCasillasSimple(this, tablero, dado.getSuma(), jugadorActual, banca);
                         } else { // Si no acabó sus tiradas extra
                             if (dado.getSuma() > 3) {
-                                jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() - 1); // Restamos 1 a las tiradas extra
-                                avanzarCasillas(dado.getSuma(), false);
+                                jugadorActual.getAvatar().setAuxMovAvanzado(jugadorActual.getAvatar().getAuxMovAvanzado() - 1); // Restamos 1 a las tiradas extra
+                                jugadorActual.getAvatar().avanzarCasillasSimple(this, tablero, dado.getSuma(), jugadorActual, banca);
                                 // Avisamos de cuántas tiradas extra le quedan
-                                if (jugadorActual.getAuxMovAvanzado() > 0) {
-                                    Juego.getConsolaNormal().imprimir("\nLanzamientos extra restantes: %d. Cuando saques menos de un 4, no podrás tirar de nuevo.\n" + jugadorActual.getAuxMovAvanzado());
+                                if (jugadorActual.getAvatar().getAuxMovAvanzado() > 0) {
+                                    Juego.getConsolaNormal().imprimir("\nLanzamientos extra restantes: %d. Cuando saques menos de un 4, no podrás tirar de nuevo.\n" + jugadorActual.getAvatar().getAuxMovAvanzado());
                                 } else {
                                     Juego.getConsolaNormal().imprimir("\nNo te quedan más lanzamientos extra por el movimiento especial.\n");
                                     if (dado.areEqual()) {
@@ -497,7 +512,7 @@ public class Juego implements Comando{
                                     }
                                 }
                             } else { // Si saca menos de 4, no se mueve y además no tiene más tiradas extra.
-                                jugadorActual.setAuxMovAvanzado(0);
+                                jugadorActual.getAvatar().setAuxMovAvanzado(0);
                                 consolaNormal.imprimir("\nHas sacado menos de un 4, por lo que no tienes más lanzamientos extra.");
                                 if (dado.areEqual()) {
                                     Juego.getConsolaNormal().imprimir("\nPero como has sacado dobles... ¡Tienes otra tirada más!\n");
@@ -507,7 +522,7 @@ public class Juego implements Comando{
                     }
                 }
             } else { // Si el movimiento avanzado no está activado
-                avanzarCasillas(dado.getSuma(), false);
+                jugadorActual.getAvatar().avanzarCasillasSimple(this, tablero, dado.getSuma(), jugadorActual, banca);
             }
             tablero.imprimirTablero();
             accionCasilla();
@@ -523,27 +538,27 @@ public class Juego implements Comando{
         else if (!haTirado) {
             consolaNormal.imprimir("Aun no has tirado los dados. Tiralos para poder comprar propiedades");
         }
-        else if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
-            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
-                if (jugadorActual.getPuedeComprarPropiedades()) {
-                    if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
+        else if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getAvatar().getCasilla(tablero.getCasillas()).getNombre())) {
+            if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // Si es coche
+                if (((Coche) jugadorActual.getAvatar()).getPuedeComprarPropiedades()) {
+                    if (!jugadorActual.getAvatar().getCasilla(tablero.getCasillas()).isComprable()) {
                         consolaNormal.imprimir("No puedes comprar esta propiedad");
                     } else {
                         comprarCasilla();
-                        consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
+                        consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getAvatar().getCasilla(tablero.getCasillas())).getPrecio() + "$");
                         consolaNormal.imprimir("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
-                        jugadorActual.setPuedeComprarPropiedades(false);
+                        ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(false);
                     }
                 } else {
                     consolaNormal.imprimir("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
                 }
             }
-            else if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
+            else if (!jugadorActual.getAvatar().getCasilla(tablero.getCasillas()).isComprable()) {
                 consolaNormal.imprimir("No puedes comprar esta propiedad");
                 //break;
             } else {
                 comprarCasilla();
-                consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
+                consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getAvatar().getCasilla(tablero.getCasillas())).getPrecio() + "$");
             }
         } else { //Si está intentando comprar otra propiedad le avisamos...
             boolean c = true;
@@ -707,13 +722,13 @@ public class Juego implements Comando{
         consolaNormal.imprimir("No se reconoce el grupo/color");
     }
     public void salirCarcel(){
-        if (!jugadorActual.inCarcel()) {
+        if (!jugadorActual.getAvatar().inCarcel()) {
             consolaNormal.imprimir("No estas en la cárcel...");
         } else {
             consolaNormal.imprimir("Pagas " + precioCarcel + " para salir de la cárcel.");
             pagarAv(jugadorActual, precioCarcel);
             jugadorActual.setPagoTasasEImpuestos(jugadorActual.getPagoTasasEImpuestos() + precioCarcel);
-            jugadorActual.setTurnosCarcel(0);
+            jugadorActual.getAvatar().setTurnosCarcel(0);
         }
     }
     public void pagarDeuda(){
@@ -727,36 +742,40 @@ public class Juego implements Comando{
             consolaNormal.imprimir("Tienes que tirar antes de terminar el turno");
         }
         // Sin embargo, existe un caso en el que el jugador no puede tirar, pero tampoco puede acabar el turno. Lo tratamos:
-        else if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 1) {
+        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0 && jugadorActual.getAvatar().getAuxMovAvanzado() == 1) {
             // (Si es tipo Pelota, el movimiento avanzado está activado y aún le quedan paradas por recorrer)
             consolaNormal.imprimir("¡Aún te quedan paradas por recorrer!");
         }
-        else if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-            if (jugadorActual.getAuxMovAvanzado() < 0) { // SI EL JUGADOR QUE ACABA EL TURNO ES UN COCHE CON MOTOR ROTO
-                jugadorActual.setAuxMovAvanzado(jugadorActual.getAuxMovAvanzado() + 1);
-                if (jugadorActual.getAuxMovAvanzado() == 0) {
-                    jugadorActual.setAuxMovAvanzado(999);
+        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+            if (jugadorActual.getAvatar().getAuxMovAvanzado() < 0) { // SI EL JUGADOR QUE ACABA EL TURNO ES UN COCHE CON MOTOR ROTO
+                jugadorActual.getAvatar().setAuxMovAvanzado(jugadorActual.getAvatar().getAuxMovAvanzado() + 1);
+                if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0) {
+                    jugadorActual.getAvatar().setAuxMovAvanzado(999);
                     consolaNormal.imprimir("¡Motor reparado! En el siguiente turno podrás moverte.");
-                } else
-                    Juego.getConsolaNormal().imprimir("\nTurnos restantes para poder moverte: %d\n" + -jugadorActual.getAuxMovAvanzado());
-                jugadorActual.setPuedeComprarPropiedades(true);
-                // jugadorActual.setAuxMovAvanzado(999);
-                jugadorActual.setPuedeComprarPropiedades(true);
-                            /* if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0){
-                                hayBug=true;
-                            } */
-                nextJugador();
-                consolaNormal.imprimir("Turno de: " + jugadorActual.getNombre());
-                c = true;
+                } else{
+                    Juego.getConsolaNormal().imprimir("\nTurnos restantes para poder moverte: \n" + -jugadorActual.getAvatar().getAuxMovAvanzado());
+                    ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(true);
+                    // jugadorActual.setAuxMovAvanzado(999);
+                    if (jugadorActual.getAvatar().getTipoMov() == 1) {
+                        Coche cocheActual = (Coche) jugadorActual.getAvatar();
+                        cocheActual.setPuedeComprarPropiedades(true);
+                    }
+                    nextJugador();
+                    consolaNormal.imprimir("Turno de: " + jugadorActual.getNombre());
+                    c = true;
+                }
             }
         }
         else if (pagando && !jugadorActual.getBancarrota()) {
             consolaNormal.imprimir("Debes saldar tu deuda antes de acabar el turno, o declararte en bancarrota");
         } else {
-            if (!(jugadorActual.getTipoMov() == 1 && jugadorActual.getMovAvanzadoActivado() && jugadorActual.getAuxMovAvanzado() < 0)) {
-                jugadorActual.setAuxMovAvanzado(999);
+            if (!(jugadorActual.getAvatar().getTipoMov() == 1 && jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getAuxMovAvanzado() < 0)) {
+                jugadorActual.getAvatar().setAuxMovAvanzado(999);
             }
-            jugadorActual.setPuedeComprarPropiedades(true);
+            if (jugadorActual.getAvatar().getTipoMov() == 1) {
+                Coche cocheActual = (Coche) jugadorActual.getAvatar();
+                cocheActual.setPuedeComprarPropiedades(true);
+            }
                         /* if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0){
                             hayBug=true;
                         } */
@@ -769,25 +788,18 @@ public class Juego implements Comando{
         return c;
     }
 
-    public void acabarParada(){
-        if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0 && jugadorActual.getAuxMovAvanzado() == 0) {
-            consolaNormal.imprimir("Ya has pasado por todas tus paradas.");
-        } else if (!jugadorActual.getMovAvanzadoActivado() || (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1)) {
-            consolaNormal.imprimir("¿Paradas? Bro think he pelota con movAvanzadoActivado");
-        } else if (!(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 0))
-            tablero.imprimirTablero();
-    }
     public void cambiarMovimiento(boolean haTirado) {
         if (haTirado) {
             consolaNormal.imprimir("¡Solo puedes cambiar de movimiento al inicio de tu turno!");
         } else {
-            jugadorActual.setMovAvanzadoActivado(!jugadorActual.getMovAvanzadoActivado());
-            if (jugadorActual.getMovAvanzadoActivado())
+            jugadorActual.getAvatar().setMovAvanzadoActivado(!jugadorActual.getAvatar().getMovAvanzadoActivado());
+            if (jugadorActual.getAvatar().getMovAvanzadoActivado())
                 consolaNormal.imprimir("El movimiento avanzado está ahora activado");
             else
                 consolaNormal.imprimir("El movimiento avanzado está ahora desactivado");
         }
     }
+
     public void estadisticas(){
         consolaNormal.imprimir("Casilla(s) mas rentables:  ");
         imprimirCasillas(casillaMasRentable());
@@ -930,7 +942,16 @@ public class Juego implements Comando{
                         return true;
                 }
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("parada")) {
-                    acabarParada();
+                    if(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0 && jugadorActual.getAvatar().getAuxMovAvanzado()==0){
+                        System.out.println("Ya has pasado por todas tus paradas.");
+                        break;
+                    }
+                    else if(!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==1)){
+                        System.out.println("¿Paradas? Bro think he pelota con movAvanzadoActivado");
+                        break;
+                    }
+                    else if (!(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0)) tablero.imprimirTablero();
+                    return haTirado;
                 }
                 break;
             case "bancarrota":
@@ -1181,22 +1202,22 @@ public class Juego implements Comando{
     }
 
     private boolean puedeTirarOtraVez(boolean haTirado) {
-        if (jugadorActual.getMovAvanzadoActivado()) { // SI ESTÁ EL MOVIMIENTO AVANZADO ACTIVADO, DISTINGUIMOS ENTRE "PELOTA" Y "COCHE"
-            if (jugadorActual.getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
-                if (jugadorActual.getAuxMovAvanzado() == 1) { // Si le quedan paradas sin recorrer, no puede tirar
+        if (jugadorActual.getAvatar().getMovAvanzadoActivado()) { // SI ESTÁ EL MOVIMIENTO AVANZADO ACTIVADO, DISTINGUIMOS ENTRE "PELOTA" Y "COCHE"
+            if (jugadorActual.getAvatar().getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                if (jugadorActual.getAvatar().getAuxMovAvanzado() == 1) { // Si le quedan paradas sin recorrer, no puede tirar
                     return false;
                 }
-                if (jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si no le quedan paradas y tampoco sacó dobles, no puede tirar
+                if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si no le quedan paradas y tampoco sacó dobles, no puede tirar
                     return false;
                 }
             }
 
-            if (jugadorActual.getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
-                if (jugadorActual.getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si se le acabaron las tiradas extra y no sacó dobles en la anterior, no puede tirar
+            if (jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si se le acabaron las tiradas extra y no sacó dobles en la anterior, no puede tirar
                     return false;
                 }
                 // Motor roto
-                return jugadorActual.getTipoMov() != 1 || jugadorActual.getAuxMovAvanzado() >= 0;
+                return jugadorActual.getAvatar().getTipoMov() != 1 || jugadorActual.getAvatar().getAuxMovAvanzado() >= 0;
             }
         } else { // SI NO ESTÁ ACTIVADO EL MOV AVANZADO...
             return !haTirado || dado.areEqual();
