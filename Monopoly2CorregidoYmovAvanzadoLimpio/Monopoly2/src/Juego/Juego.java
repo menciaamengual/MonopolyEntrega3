@@ -54,6 +54,14 @@ public class Juego implements Comando{
     }
 
     //METODOS PUBLICOS
+    public void darAlta(String nombre,int tipoMov){
+        char miAvatar = generaAvatar();
+
+        jugadores.add(new Jugador(dineroInicial, nombre, miAvatar, tipoMov));
+        for (Jugador ite : jugadores)
+            ite.setFortuna(dineroInicial);
+    }
+
     public void darAlta() {
         String miNombre = consolaNormal.leer("Introduce tu nombre, Jugador " + (jugadores.size() + 1) + " : ");
         char miAvatar = generaAvatar();
@@ -344,9 +352,18 @@ public class Juego implements Comando{
         else if (casilla instanceof Carcel) ((Carcel) casilla).accionCasilla(jugadorActual);
 
         else if (casilla instanceof Comunidad || casilla instanceof Suerte) {
+            int indice = 0;
             carta = new Carta(jugadorActual.getPosicion());
             carta.barajar();
-            int indice = consolaNormal.leerInt("Elige una carta (introduciendo un numero del 1 al 6)");
+            boolean f;
+            do{
+                try {
+                    f = false;
+                    indice = consolaNormal.leerInt("Elige una carta (introduciendo un numero del 1 al 6)");
+                }catch(LeerException le){
+                    f = true;
+                }
+            }while(f);
             int numCarta = (carta.getCartas().get(indice - 1));
             if (carta.getTipo() == 0)
                 accionSuerte(numCarta);
@@ -1006,30 +1023,45 @@ public class Juego implements Comando{
         int cont = 0; //Para controlar el numero de jugadores inicializados
         consolaNormal.imprimir("Bienvenidos. Empezaremos definiendo los jugadores.");
         String entradaString;
-
+        boolean turnoPruebas = false;
         do { //J1
             entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");
-        } while (!entradaString.contains("crear jugador"));
-        darAlta();
-        consolaNormal.imprimir("¡Primer jugador registrado!");
-        do { //J2
-            entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");;
-        } while (!entradaString.contains("crear jugador"));
-        darAlta();
-        consolaNormal.imprimir("¡Segundo jugador registrado!");
-
-        do {
-            do { //Jx
-                entradaString = consolaNormal.leer("Ahora puedes introducir 'crear jugador' para darte de alta o 'empezar juego' para comenzar a jugar: \n");
-            } while (!entradaString.contains("crear jugador") && !entradaString.contains("empezar juego"));
-
-            if (entradaString.contains("crear jugador")) {
-                darAlta();
-                cont++;
-                consolaNormal.imprimir("¡Jugador registrado!");
+            if (entradaString.equals("Prueba2J")){
+                darAlta("Mateo",0);
+                darAlta("Cese",1);
+                turnoPruebas = true;
+                break;
             }
+            else if (entradaString.equals("Prueba3J")){
+                darAlta("Mateo",0);
+                darAlta("Cese",1);
+                darAlta("Mencia",1);
+                turnoPruebas = true;
+                break;
+            }
+        } while (!entradaString.contains("crear jugador"));;
+        consolaNormal.imprimir("¡Primer jugador registrado!");
+        if (!turnoPruebas) {
+            do { //J2
+                entradaString = consolaNormal.leer("Introduce crear jugador para darte de alta: \n");
+                ;
+            } while (!entradaString.contains("crear jugador"));
+            darAlta();
+            consolaNormal.imprimir("¡Segundo jugador registrado!");
 
-        } while (!entradaString.contains("empezar juego") && cont < 4);
+            do {
+                do { //Jx
+                    entradaString = consolaNormal.leer("Ahora puedes introducir 'crear jugador' para darte de alta o 'empezar juego' para comenzar a jugar: \n");
+                } while (!entradaString.contains("crear jugador") && !entradaString.contains("empezar juego"));
+
+                if (entradaString.contains("crear jugador")) {
+                    darAlta();
+                    cont++;
+                    consolaNormal.imprimir("¡Jugador registrado!");
+                }
+
+            } while (!entradaString.contains("empezar juego") && cont < 4);
+        }
         if (cont == 4) consolaNormal.imprimir("No se pueden agregar más jugadores");
         consolaNormal.imprimir("¡Jugadores registrados!");
 

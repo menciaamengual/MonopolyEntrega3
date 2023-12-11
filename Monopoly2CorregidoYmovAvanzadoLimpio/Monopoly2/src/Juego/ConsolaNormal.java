@@ -28,12 +28,12 @@ public class ConsolaNormal implements Consola{
     }
     @Override
     public int leerInt (String descripcion) throws LeerException{
-        try {
-            System.out.println(descripcion);
-            Scanner entrada = new Scanner(System.in);
-            return entrada.nextInt();
-        }catch (Exception e){
-            throw new LeerException("Solo se aceptan números enteros.");
-        }
+            try {
+                System.out.println(descripcion);
+                Scanner entrada = new Scanner(System.in);
+                return entrada.nextInt();
+            } catch (Exception e) {
+                throw new LeerException("Solo se aceptan números enteros.");
+            }
     }
 }
