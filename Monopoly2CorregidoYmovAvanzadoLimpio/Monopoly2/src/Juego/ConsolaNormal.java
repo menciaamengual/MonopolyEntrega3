@@ -1,16 +1,26 @@
 package Juego;
 
-import Juego.Exceptions.LeerException;
+import Juego.Exceptions.Lectura.LeerException;
 
 import java.util.Scanner;
 
 public class ConsolaNormal implements Consola{
 
+    /**
+     * Impresión de string con \n
+     */
     @Override
     public void imprimir(String mensaje) {
         System.out.println(mensaje);
     }
 
+    /**
+     * Impresión de objetos con \n
+     */
+    @Override
+    public void imprimir(Object mensaje) { //Cogemos un object
+        System.out.println(mensaje);
+    }
     @Override
     public String leer(String descripcion){
         System.out.print(descripcion);
@@ -19,7 +29,7 @@ public class ConsolaNormal implements Consola{
     }
 
     @Override
-    public String[] leerFragmentado(String descripcion) {
+    public String[] leerConsolaFragmentado(String descripcion) {
         System.out.print(descripcion);
         Scanner entrada = new Scanner(System.in);
         String entradaString = entrada.nextLine();

@@ -2,7 +2,11 @@ package Juego;
 
 import java.util.*;
 
-import Juego.Exceptions.LeerException;
+import Juego.Exceptions.*;
+import Juego.Exceptions.Lectura.*;
+import Juego.Exceptions.Comandos.*;
+import Juego.Exceptions.Comprar.*;
+import Juego.Exceptions.Hipotecar.*;
 import Procesos.*;
 import Procesos.Casillas.*;
 
@@ -15,7 +19,7 @@ public class Juego implements Comando{
     private int pBase; //Precio casilla primer grupo
     private Jugador jugadorActual;
     private final ArrayList<Jugador> jugadores;
-    // private boolean hayBug; //Encontramos un error por el cual, tras la finalización del turno de un coche con movimiento avanzado, el siguiente jugador no puede tirar. Este booleano lo detectará y nos permitirá solucionarlo en menuAccion.
+    //private boolean hayBug; //Encontramos un error por el cual, tras la finalización del turno de un coche con movimiento avanzado, el siguiente jugador no puede tirar. Este booleano lo detectará y nos permitirá solucionarlo en menuAccion.
 
     private final Jugador banca;
     private final Dado dado;
@@ -370,21 +374,34 @@ public class Juego implements Comando{
      * Función de compra de la casilla, con comprobación de si el jugadorActual tienen suficiente dinero
      * Realiza la transacción correspondiente entre el jugador y la banca, y mueve la propiedad de la Procesos.Casilla, y del grupo en caso de que corresponda
      */
-    public void comprarCasilla() { //todo garantizar que se añade a propie
+    public boolean comprarCasilla(){ //todo garantizar que se añade a propie
         Propiedad casilla;
         Casilla casillac = jugadorActual.getCasilla(tablero.getCasillas());
-        if (!(casillac instanceof Propiedad)) { //RARO
-            consolaNormal.imprimir("No puedes comprar esta casilla");
-            return;
-        }
         casilla = (Propiedad) casillac;
-        if (jugadorActual.getDinero() >= casilla.getPrecio()) {
+
+        try{
+            if (!(casillac instanceof Propiedad))
+                throw new ComprarExceptionCasillaNoPropiedad();
+            if (!casilla.getPropietario().isBanca() || casilla.getPropietario() == null)
+                throw new ComprarExceptionCasillaConDueno();
+            if (jugadorActual.getDinero() < casilla.getPrecio())
+                throw new ComprarExceptionDineroInsuficiente();
+            if (!casillac.getOcupantes().contains(jugadorActual))
+                throw new ComprarExceptionCasillaDistinta();
+
+
+        } catch(ComprarException e) {return false;}
+
             casilla.getPropietario().addDinero(casilla.getPrecio());
             casilla.setPropietario(jugadorActual);
-            jugadorActual.setDinero(jugadorActual.getDinero() - casilla.getPrecio());
+
+            jugadorActual.pagar(casilla.getPrecio());
             jugadorActual.setDineroInvertido(jugadorActual.getDineroInvertido() + casilla.getPrecio());
             jugadorActual.setFortuna(jugadorActual.getFortuna() + casilla.getPrecio());
-        } else consolaNormal.imprimir("Cuidado... Ya no tienes dinero suficiente para comprar esta casilla.");
+
+            consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
+
+        return true;
     }
 
 
@@ -407,6 +424,12 @@ public class Juego implements Comando{
         consolaNormal.imprimir("Posición: " + jugadorActual.getPosicion());
     }
     public boolean tirarDados(boolean haTirado, String[] entradaPartida) throws LeerException {
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return false;
+        }
 // EN PRIMER LUGAR, COMPROBAMOS SI EL JUGADOR ESTÁ EN LA CÁRCEL Y EJECUTAMOS LAS ACCIONES CORRESPONDIENTES
         if (jugadorActual.inCarcel()) {
             if (jugadorActual.getTurnosCarcel() == 1) {
@@ -527,24 +550,25 @@ public class Juego implements Comando{
         return false;
     }
 
-    public void comprar(String[] entradaPartida, boolean haTirado){ //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
-        if (jugadorActual.getBancarrota()) {
-            consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
+    public void comprarComando(String[] entradaPartida, boolean haTirado){ //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+            else if (!haTirado)
+                throw new ComandoNoHaTiradoException();
+            else if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1)
+                if (jugadorActual.getPuedeComprarPropiedades()) throw new ComandoNoMasComprasException();
+        }catch (ComandoException ce){
+            return;
         }
-        else if (!haTirado) {
-            consolaNormal.imprimir("Aun no has tirado los dados. Tiralos para poder comprar propiedades");
-        }
-        else if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
+
+        if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
             if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
                 if (jugadorActual.getPuedeComprarPropiedades()) {
-                    if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
-                        consolaNormal.imprimir("No puedes comprar esta propiedad");
-                    } else {
-                        comprarCasilla();
-                        consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
-                        consolaNormal.imprimir("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
-                        jugadorActual.setPuedeComprarPropiedades(false);
-                    }
+                        if (comprarCasilla()) {
+                            consolaNormal.imprimir("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
+                            jugadorActual.setPuedeComprarPropiedades(false);
+                        }
                 } else {
                     consolaNormal.imprimir("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
                 }
@@ -554,20 +578,27 @@ public class Juego implements Comando{
                 //break;
             } else {
                 comprarCasilla();
-                consolaNormal.imprimir("Propiedad comprada con éxito por " + ((Propiedad) jugadorActual.getCasilla(tablero.getCasillas())).getPrecio() + "$");
             }
         } else { //Si está intentando comprar otra propiedad le avisamos...
-            boolean c = true;
+            if (tablero.getCasilla(entradaPartida[1]) == null) consolaNormal.imprimir("Esta casilla no existe...");
+            else consolaNormal.imprimir("No estás en esta casilla");
+            /*boolean c = true;
             for (Casilla ite : getTablero().getCasillas()) {
                 if (entradaPartida[1].equals(ite.getNombre())) {
                     consolaNormal.imprimir("Solo puedes comprar la casilla en la que caes...");
                     c = false;
                 }
             }
-            if (c) consolaNormal.imprimir("Esta casilla no existe");
+            if (c) consolaNormal.imprimir("Esta casilla no existe");*/
         }
     }
     public void edificar(String[] entradaPartida){
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
         boolean caidas;
         caidas = contadorCasillas.get(jugadorActual).get(jugadorActual.getCasilla(tablero.getCasillas())) == 2;
 
@@ -597,6 +628,12 @@ public class Juego implements Comando{
                 consolaNormal.imprimir("No estás en un solar >: (");
     }
     public void venderEdificio(String[] entradaPartida){
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
         Edificio aux = null;
         if (entradaPartida.length > 2) {
             String identificador = entradaPartida[1] + " " + entradaPartida[2];
@@ -612,37 +649,64 @@ public class Juego implements Comando{
             else consolaNormal.imprimir("Identificador inválido...");
         } else consolaNormal.imprimir("Identificador inválido...");
     }
-    public void hipotecar(String[] entradaPartida){
-        if (jugadorActual.getBancarrota())
-            consolaNormal.imprimir("Ya no puedes hipotecar, desgraciadamente estas en bancarrota y la partida se ha acabado para ti.");
-        else if (entradaPartida.length > 1) {
-            Casilla casilla = tablero.getCasilla(entradaPartida[1]);
+    public void hipotecar(String[] entradaPartida) throws LeerIncorrectoException {
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
+        Casilla casilla;
+        if (entradaPartida.length > 1) {
+            try{
+            casilla = tablero.getCasilla(entradaPartida[1]);
             if (casilla == null)
-                consolaNormal.imprimir("Esta casilla no existe");
+                throw new HipotecarCasillaInexistenteException();
             else if (!(casilla instanceof Propiedad))
-                consolaNormal.imprimir("Esta casilla no es hipotecable");
+                throw new HipotecarCasillanNoHipotecableException();
             else if (!((Propiedad) casilla).getPropietario().equals(jugadorActual))
-                consolaNormal.imprimir("No puedes hipotecar una casilla que no es tuya");
-            else
-                ((Propiedad) casilla).hipotecar();
-        }
-    }
-    public void deshipotecar(String[] entradaPartida){
-        if (jugadorActual.getBancarrota())
-            consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-        else if (entradaPartida.length > 1) {
-            Casilla casilla = tablero.getCasilla(entradaPartida[1]);
-            if (casilla == null)
-                consolaNormal.imprimir("Esta casilla no existe");
-            else if (!(casilla instanceof Propiedad))
-                consolaNormal.imprimir("Esta casilla no es hipotecable");
-            else if (!((Propiedad) casilla).getPropietario().equals(jugadorActual)) {
-                consolaNormal.imprimir("No puedes deshipotecar una casilla que no es tuya");
+                throw new HipotecarPropiedadDeOtro();
+
+        }catch(HipotecarException he){
+                return;
             }
-            else ((Propiedad) casilla).deshipotecar();
+            ((Propiedad) casilla).hipotecar();
         }
+        else throw new LeerIncorrectoException();
     }
+    public void deshipotecar(String[] entradaPartida) throws LeerIncorrectoException {
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
+        Casilla casilla;
+        if (entradaPartida.length > 1) {
+            try{
+                casilla = tablero.getCasilla(entradaPartida[1]);
+                if (casilla == null)
+                    throw new HipotecarCasillaInexistenteException();
+                else if (!(casilla instanceof Propiedad))
+                    throw new HipotecarCasillanNoHipotecableException();
+                else if (!((Propiedad) casilla).getPropietario().equals(jugadorActual))
+                    throw new desHipotecarPropiedadDeOtro();
+
+            }catch(HipotecarException he){
+                return;
+            }
+            ((Propiedad) casilla).deshipotecar();
+        }
+        else throw new LeerIncorrectoException();
+    }
+
     public void bancarrota(){
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
         String respuesta = consolaNormal.leer("¿Estás seguro de que quieres declararte en bancarrota?");
         if (respuesta.equals("si") || respuesta.equals("Si") || respuesta.equals("SI"))
             jugadorActual.declararBancarrota(cobradorPendiente);
@@ -718,6 +782,12 @@ public class Juego implements Comando{
         consolaNormal.imprimir("No se reconoce el grupo/color");
     }
     public void salirCarcel() throws LeerException {
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
         if (!jugadorActual.inCarcel()) {
             consolaNormal.imprimir("No estas en la cárcel...");
         } else {
@@ -728,6 +798,12 @@ public class Juego implements Comando{
         }
     }
     public void pagarDeuda() throws LeerException {
+        try{
+            if (jugadorActual.getBancarrota())
+                throw new ComandoBancarrotaException();
+        }catch (ComandoException ce){
+            return;
+        }
         if (pagando) {
             pagarAv(jugadorActual, pagoPendiente, cobradorPendiente);
         } else consolaNormal.imprimir("No tienes nada que pagar :D");
@@ -829,12 +905,13 @@ public class Juego implements Comando{
     }
 
 
-    public boolean menuAccion(boolean haTirado) throws LeerException { //Lee y llama a la acción indicada sobre el jugadorActual
+    public boolean menuAccion(boolean haTirado){
+        try{//Lee y llama a la acción indicada sobre el jugadorActual
         //Comprobaciones/actualizaciones en cada turno
         actualizarPropietarioCasillas();
         // System.out.printf("\nAuxiliar es %d\n", jugadorActual.getAuxMovAvanzado());
 
-        String[] entradaPartida = consolaNormal.leerFragmentado("Introduce una acción. Puedes escribir \"ayuda\" para obtener un listado de acciones.\n $>");
+        String[] entradaPartida = consolaNormal.leerConsolaFragmentado("Introduce una acción. Puedes escribir \"ayuda\" para obtener un listado de acciones.\n $>");
 
         switch (entradaPartida[0]) { //Si no reconoce lo introducido, no llamamos a nada, se llama después del switch
             //case "numero": consolaNormal.imprimir(jugadores.size());break;
@@ -856,6 +933,7 @@ public class Juego implements Comando{
                         if (entradaPartida.length > 2 && (entradaPartida[2].equals("venta") || entradaPartida[2].equals("Venta"))) {
                             listarEnVenta();
                         }
+                        else throw new LeerIncorrectoException();
                         break;
                     case "Avatares":
                     case "avatares":
@@ -878,17 +956,14 @@ public class Juego implements Comando{
                 deshipotecar(entradaPartida);
                 break;
             case "comprar":
-                comprar(entradaPartida, haTirado);
+                comprarComando(entradaPartida, haTirado);
                 break;
             case "salir":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
                 if (entradaPartida.length > 1)
                     if (entradaPartida[1].equals("carcel") || entradaPartida[1].equals("cárcel")) {
                         salirCarcel();
                     }
+                else throw new LeerIncorrectoException();
                 break;
             case "ver":
                 if (entradaPartida[1].equals("tablero")) {
@@ -897,10 +972,6 @@ public class Juego implements Comando{
                 break;
             case "tirar":
             case "lanzar":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
                 if (entradaPartida[1].equals("dados")) {
                     haTirado = tirarDados(haTirado,entradaPartida);
                 }
@@ -929,10 +1000,6 @@ public class Juego implements Comando{
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("partida")) return false;
                 break;
             case "pagar":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
                 pagarDeuda();
                 break;
             case "acabar":
@@ -946,10 +1013,6 @@ public class Juego implements Comando{
                 break;
             case "bancarrota":
             case "Bancarrota":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, tristemente la partida se ha acabado para ti.");
-                    break;
-                }
                 bancarrota();
                 break;
             case "estadisticas":
@@ -962,22 +1025,17 @@ public class Juego implements Comando{
                 break;
             case "edificar":
             case "construir":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
                 edificar(entradaPartida);
                 break;
             case "vender":
             case "Vender":
-                if (jugadorActual.getBancarrota()) {
-                    consolaNormal.imprimir("No puedes ejecutar esta acción estando en bancarrota, la partida se ha acabado para ti.");
-                    break;
-                }
                 venderEdificio(entradaPartida);
                 break;
             default:
-                consolaNormal.imprimir("No se reconoce la acción... Introduce 'ayuda' para ver tus opciones.");
+                throw new LeerIncorrectoException();
+        }}
+        catch(LeerException le){
+            return menuAccion(haTirado);
         }
         return menuAccion(haTirado);
     }
@@ -1033,6 +1091,7 @@ public class Juego implements Comando{
                 break;
             }
         } while (!entradaString.contains("crear jugador"));
+        if (!turnoPruebas) darAlta();
         consolaNormal.imprimir("¡Primer jugador registrado!");
         if (!turnoPruebas) {
             do { //J2

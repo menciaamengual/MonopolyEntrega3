@@ -3,7 +3,7 @@ package Juego;
 //Mateito, Cese y Mencía
 
 
-import Juego.Exceptions.LeerException;
+import Juego.Exceptions.Lectura.LeerException;
 
 public class Main {
     public static void main(String[] args) throws LeerException {

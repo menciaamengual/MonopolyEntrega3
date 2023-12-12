@@ -1,17 +1,18 @@
 package Juego;
 
-import Juego.Exceptions.LeerException;
+import Juego.Exceptions.Lectura.LeerException;
+import Juego.Exceptions.Lectura.LeerIncorrectoException;
 
 public interface Comando {
     void ayuda(boolean haTirado);
     void imprimirTablero();
     void jugador();
     boolean tirarDados(boolean haTirado, String[] entradaPartida) throws LeerException;
-    void comprar(String[] entradaPartida, boolean haTirado);
+    void comprarComando(String[] entradaPartida, boolean haTirado);
     void edificar(String[] entradaPartida);
     void venderEdificio(String[] entradaPartida);
-    void hipotecar(String[] entradaPartida);
-    void deshipotecar(String[] entradaPartida);
+    void hipotecar(String[] entradaPartida) throws LeerIncorrectoException;
+    void deshipotecar(String[] entradaPartida) throws LeerIncorrectoException;
     void bancarrota();
     void describirJugador(String[] entradaPartida);
     void describirCasilla(String s);
