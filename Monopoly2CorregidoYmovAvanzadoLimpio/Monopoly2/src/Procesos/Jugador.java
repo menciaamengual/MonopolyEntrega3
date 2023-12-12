@@ -13,6 +13,8 @@ public class Jugador {
     private String nombre;
     private int dinero;
     private ArrayList<Propiedad> propiedades;
+    private ArrayList<Trato> tratosPropuestos;
+    private ArrayList<Trato> tratosRecibidos;
     private ArrayList<Carta> cartasSuerte;
     private int vueltas;
     private boolean bancarrota;
@@ -62,6 +64,14 @@ public class Jugador {
 
     public ArrayList<Propiedad> getPropiedades() {
         return propiedades;
+    }
+
+    public ArrayList<Trato> getTratosPropuestos() {
+        return tratosPropuestos;
+    }
+
+    public ArrayList<Trato> getTratosRecibidos() {
+        return tratosRecibidos;
     }
 
     public int getDinero() {
@@ -196,6 +206,15 @@ public class Jugador {
     public void setPropiedades(ArrayList<Propiedad> propiedades) {
         this.propiedades = propiedades;
     }
+
+    public void setTratosPropuestos(ArrayList<Trato> tratosPropuestos) {
+        this.tratosPropuestos = tratosPropuestos;
+    }
+
+    public void setTratosRecibidos(ArrayList<Trato> tratosRecibidos) {
+        this.tratosRecibidos = tratosRecibidos;
+    }
+
 
     public void setBancarrota(boolean bancarrota) {
         this.bancarrota = bancarrota;

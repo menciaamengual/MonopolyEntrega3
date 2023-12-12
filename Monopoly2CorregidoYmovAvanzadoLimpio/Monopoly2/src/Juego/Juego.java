@@ -1224,5 +1224,15 @@ public class Juego implements Comando{
         }
         return true; // En el resto de los casos, el jugador SÍ puede tirar.
     }
+
+    public Jugador getJugador(String nombre) { // DADO UN NOMBRE, DEVUELVE EL JUGADOR CON ESE NOMBRE
+        for (Jugador jugador : jugadores) {
+            if (jugador.getNombre().equals(nombre)) {
+                return jugador;
+            }
+        }
+        return null;
+    }
+
 }
 
