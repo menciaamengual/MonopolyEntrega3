@@ -1234,5 +1234,236 @@ public class Juego implements Comando{
         return null;
     }
 
+    public void proponerTrato(Jugador jugadorActual, Tablero tablero){
+
+        // Pedimos el tipo de trato
+        int tipoTrato;
+        do {
+            consolaNormal.imprimir("Los tipos de trato que puedes proponer son los siguientes:");
+            consolaNormal.imprimir(" 0. Cambiar una propiedad por otra");
+            consolaNormal.imprimir(" 1. Vender una propiedad");
+            consolaNormal.imprimir(" 2. Comprar una propiedad");
+            consolaNormal.imprimir(" 3. Cambiar una propiedad por otra y pedir dinero");
+            consolaNormal.imprimir(" 4. Cambiar una propiedad por otra y ofrecer dinero");
+            consolaNormal.imprimir(" 5. Cambiar una propiedad por otra, y no pagar alquiler en otra propiedad de tu elección durante un número de turnos");
+            tipoTrato = consolaNormal.leerInt("Introduce el tipo de trato que quieres proponer (0-5) " + " : ");
+            if(tipoTrato > -1 && tipoTrato <6){
+                break;
+            }
+        } while (true);
+
+        // Pedimos el nombre del jugador al que se le va a proponer el trato
+
+        String nombreReceptor = Juego.getConsolaNormal().leer("Introduce el nombre del jugador a quien quieres proponer el trato" + " : ");
+        if (getJugador(nombreReceptor) == null){
+            Juego.getConsolaNormal().imprimir("De momento, ese tal " + nombreReceptor + " no está disfrutando de nuestro increíble Monopoly...");
+            return;
+        }
+
+        // Pedimos los datos necesarios para cada tipo de trato
+
+        String nombrePropOfrecida;
+        String nombrePropSolicitada;
+        String nombrePropExenta;
+        int dineroOfrecido;
+        int dineroSolicitado;
+        int turnosExento;
+
+        switch (tipoTrato){
+            case 0:
+
+                // Pedimos la propiedad ofrecida
+
+                nombrePropOfrecida = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres ofrecer" + " : ");
+                if (!(tablero.getCasilla(nombrePropOfrecida) instanceof Propiedad) || tablero.getCasilla(nombrePropOfrecida)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropOfrecida)).getPropietario().equals(jugadorActual))){ // Si el jugador que propone el trato no es propietario...
+                    Juego.getConsolaNormal().imprimir("Okupa, ¡esa propiedad no es tuya!");
+                    return;
+                }
+
+                // Pedimos la propiedad solicitada
+
+                nombrePropSolicitada = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres solicitar" + " : ");
+                if (!(tablero.getCasilla(nombrePropSolicitada) instanceof Propiedad) || tablero.getCasilla(nombrePropSolicitada)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropSolicitada)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropSolicitada);
+                    return;
+                }
+
+                // Ahora que ya tenemos lo necesario, llamamos al constructor
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+
+            case 1:
+
+                // Pedimos la propiedad ofrecida
+
+                nombrePropOfrecida = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres vender" + " : ");
+                if (!(tablero.getCasilla(nombrePropOfrecida) instanceof Propiedad) || tablero.getCasilla(nombrePropOfrecida)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropOfrecida)).getPropietario().equals(jugadorActual))){ // Si el jugador que propone el trato no es propietario...
+                    Juego.getConsolaNormal().imprimir("Okupa, ¡esa propiedad no es tuya!");
+                    return;
+                }
+
+                // Pedimos el dinero solicitado
+
+                dineroSolicitado = Juego.getConsolaNormal().leerInt("Introduce el dinero que quieres solicitar" + " : ");
+                // todo COMPROBACIÓN DE QUE ES MAYOR QUE 0 (Ya si tal...)
+
+                // Ahora que ya tenemos lo necesario, llamamos al constructor
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), dineroSolicitado));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), dineroSolicitado));
+
+            case 2:
+
+                // Pedimos la propiedad solicitada
+
+                nombrePropSolicitada = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres solicitar" + " : ");
+                if (!(tablero.getCasilla(nombrePropSolicitada) instanceof Propiedad) || tablero.getCasilla(nombrePropSolicitada)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropSolicitada)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropSolicitada);
+                    return;
+                }
+
+                // Pedimos el dinero ofrecido
+
+                dineroOfrecido = Juego.getConsolaNormal().leerInt("Introduce el dinero que quieres ofrecer" + " : ");
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), dineroOfrecido, (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), dineroOfrecido, (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+
+            case 3:
+
+                // Pedimos la propiedad ofrecida
+
+                nombrePropOfrecida = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres ofrecer" + " : ");
+                if (!(tablero.getCasilla(nombrePropOfrecida) instanceof Propiedad) || tablero.getCasilla(nombrePropOfrecida)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropOfrecida)).getPropietario().equals(jugadorActual))){ // Si el jugador que propone el trato no es propietario...
+                    Juego.getConsolaNormal().imprimir("Okupa, ¡esa propiedad no es tuya!");
+                    return;
+                }
+
+                // Pedimos la propiedad solicitada
+
+                nombrePropSolicitada = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres solicitar" + " : ");
+                if (!(tablero.getCasilla(nombrePropSolicitada) instanceof Propiedad) || tablero.getCasilla(nombrePropSolicitada)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropSolicitada)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropSolicitada);
+                    return;
+                }
+
+                // Pedimos el dinero solicitado
+
+                dineroSolicitado = Juego.getConsolaNormal().leerInt("Introduce el dinero que quieres solicitar" + " : ");
+
+                // Ahora que ya tenemos lo necesario, llamamos al constructor
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), dineroSolicitado));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), dineroSolicitado));
+
+            case 4:
+
+                // Pedimos la propiedad ofrecida
+
+                nombrePropOfrecida = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres ofrecer" + " : ");
+                if (!(tablero.getCasilla(nombrePropOfrecida) instanceof Propiedad) || tablero.getCasilla(nombrePropOfrecida)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropOfrecida)).getPropietario().equals(jugadorActual))){ // Si el jugador que propone el trato no es propietario...
+                    Juego.getConsolaNormal().imprimir("Okupa, ¡esa propiedad no es tuya!");
+                    return;
+                }
+
+                // Pedimos la propiedad solicitada
+
+                nombrePropSolicitada = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres solicitar" + " : ");
+                if (!(tablero.getCasilla(nombrePropSolicitada) instanceof Propiedad) || tablero.getCasilla(nombrePropSolicitada)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropSolicitada)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropSolicitada);
+                    return;
+                }
+
+                // Pedimos el dinero ofrecido
+
+                dineroOfrecido = Juego.getConsolaNormal().leerInt("Introduce el dinero que quieres ofrecer" + " : ");
+
+                // Ahora que ya tenemos lo necesario, llamamos al constructor
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), dineroOfrecido, (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), dineroOfrecido, (Propiedad) tablero.getCasilla(nombrePropSolicitada)));
+
+            case 5:
+
+                // Pedimos la propiedad ofrecida
+
+                nombrePropOfrecida = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres ofrecer" + " : ");
+                if (!(tablero.getCasilla(nombrePropOfrecida) instanceof Propiedad) || tablero.getCasilla(nombrePropOfrecida)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropOfrecida)).getPropietario().equals(jugadorActual))){ // Si el jugador que propone el trato no es propietario...
+                    Juego.getConsolaNormal().imprimir("Okupa, ¡esa propiedad no es tuya!");
+                    return;
+                }
+
+                // Pedimos la propiedad solicitada
+
+                nombrePropSolicitada = Juego.getConsolaNormal().leer("Nombre de la propiedad que quieres solicitar" + " : ");
+                if (!(tablero.getCasilla(nombrePropSolicitada) instanceof Propiedad) || tablero.getCasilla(nombrePropSolicitada)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropSolicitada)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropSolicitada);
+                    return;
+                }
+
+                //Pedimos la propiedad en la que desea no pagar alquiler el solicitante
+
+                nombrePropExenta = Juego.getConsolaNormal().leer("Nombre de la propiedad en la que quieres no pagar alquiler durante cierto número de turnos" + " : ");
+                if (!(tablero.getCasilla(nombrePropExenta) instanceof Propiedad) || tablero.getCasilla(nombrePropExenta)==null){ // Si lo introducido NO es una propiedad o es una casilla inexistente...
+                    Juego.getConsolaNormal().imprimir("Eso no es una propiedad.");
+                    return;
+                }
+                if(!(((Propiedad) tablero.getCasilla(nombrePropExenta)).getPropietario().equals(getJugador(nombreReceptor)))){ // Si el jugador al que se le propone el trato no es propietario de dicha propiedad
+                    Juego.getConsolaNormal().imprimir(nombreReceptor + " no es el propietario de " + nombrePropExenta);
+                    return;
+                }
+
+                // Pedimos el número de turnos de exención
+
+                turnosExento = Juego.getConsolaNormal().leerInt("Introduce el número de turnos de exención que quieres solicitar" + " : ");
+
+
+                // Ahora que ya tenemos lo necesario, llamamos al constructor
+
+                jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), (Propiedad) tablero.getCasilla(nombrePropExenta), turnosExento));
+                getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), (Propiedad) tablero.getCasilla(nombrePropExenta), turnosExento));
+        }
+    }
 }
 

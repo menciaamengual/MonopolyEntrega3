@@ -294,6 +294,20 @@ public class Jugador {
         return i;
     }
 
+    public void addTratoPropuesto(Trato trato) {
+        if (tratosPropuestos == null) {
+            tratosPropuestos = new ArrayList<>();
+        }
+        tratosPropuestos.add(trato);
+    }
+
+    public void addTratoRecibido(Trato trato) {
+        if (tratosRecibidos == null) {
+            tratosRecibidos = new ArrayList<>();
+        }
+        tratosRecibidos.add(trato);
+    }
+
 
     public boolean equals(Jugador obj) {
         return nombre.equals(obj.getNombre());
