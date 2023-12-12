@@ -1,5 +1,6 @@
 package Juego;
 
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 
 import Juego.Exceptions.*;
@@ -465,7 +466,7 @@ public class Juego implements Comando{
             // 2. HACEMOS RETURN EN LOS CASOS EN LOS QUE *NO* PUEDE LANZAR DADOS
 
             if (!puedeTirarOtraVez(haTirado)) {
-                consolaNormal.imprimir("¡No puedes volver a tirar los dados!");
+                consolaNormal.imprimirError("¡No puedes volver a tirar los dados!");
                 return true;
             }
 
@@ -550,7 +551,7 @@ public class Juego implements Comando{
         return false;
     }
 
-    public void comprarComando(String[] entradaPartida, boolean haTirado){ //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
+    public void comprarComando(String[] entradaPartida, boolean haTirado) throws LeerIncorrectoException { //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
         try{
             if (jugadorActual.getBancarrota())
                 throw new ComandoBancarrotaException();
@@ -561,35 +562,29 @@ public class Juego implements Comando{
         }catch (ComandoException ce){
             return;
         }
-
-        if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
-            if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
-                if (jugadorActual.getPuedeComprarPropiedades()) {
+        try {
+            if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getCasilla(tablero.getCasillas()).getNombre())) {
+                if (jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov() == 1) { // Si es coche
+                    if (jugadorActual.getPuedeComprarPropiedades()) {
                         if (comprarCasilla()) {
                             consolaNormal.imprimir("No podrás comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
                             jugadorActual.setPuedeComprarPropiedades(false);
                         }
+                    } else {
+                        consolaNormal.imprimir("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
+                    }
+                } else if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
+                    consolaNormal.imprimir("No puedes comprar esta propiedad");
+                    //break;
                 } else {
-                    consolaNormal.imprimir("No puedes comprar más propiedades, casillas, servicios o transportes hasta que acabe tu turno.");
+                    comprarCasilla();
                 }
+            } else { //Si está intentando comprar otra propiedad le avisamos...
+                if (tablero.getCasilla(entradaPartida[1]) == null) throw new CasillaInexistenteException();
+                else consolaNormal.imprimir("No estás en esta casilla");
             }
-            else if (!jugadorActual.getCasilla(tablero.getCasillas()).isComprable()) {
-                consolaNormal.imprimir("No puedes comprar esta propiedad");
-                //break;
-            } else {
-                comprarCasilla();
-            }
-        } else { //Si está intentando comprar otra propiedad le avisamos...
-            if (tablero.getCasilla(entradaPartida[1]) == null) consolaNormal.imprimir("Esta casilla no existe...");
-            else consolaNormal.imprimir("No estás en esta casilla");
-            /*boolean c = true;
-            for (Casilla ite : getTablero().getCasillas()) {
-                if (entradaPartida[1].equals(ite.getNombre())) {
-                    consolaNormal.imprimir("Solo puedes comprar la casilla en la que caes...");
-                    c = false;
-                }
-            }
-            if (c) consolaNormal.imprimir("Esta casilla no existe");*/
+        }catch(ArrayIndexOutOfBoundsException | CasillaInexistenteException a){
+            throw new LeerIncorrectoException();
         }
     }
     public void edificar(String[] entradaPartida){
@@ -972,8 +967,12 @@ public class Juego implements Comando{
                 break;
             case "tirar":
             case "lanzar":
-                if (entradaPartida[1].equals("dados")) {
-                    haTirado = tirarDados(haTirado,entradaPartida);
+                try {
+                    if (entradaPartida[1].equals("dados")) {
+                        haTirado = tirarDados(haTirado, entradaPartida);
+                    } else throw new LeerIncorrectoException();
+                }catch(ArrayIndexOutOfBoundsException a){
+                    throw new LeerIncorrectoException();
                 }
                 break;
             case "cambiar":
@@ -1033,7 +1032,8 @@ public class Juego implements Comando{
                 break;
             default:
                 throw new LeerIncorrectoException();
-        }}
+        }
+        }
         catch(LeerException le){
             return menuAccion(haTirado);
         }

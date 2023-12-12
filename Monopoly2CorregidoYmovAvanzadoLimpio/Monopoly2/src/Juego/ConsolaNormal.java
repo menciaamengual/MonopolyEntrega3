@@ -1,6 +1,7 @@
 package Juego;
 
 import Juego.Exceptions.Lectura.LeerException;
+import Juego.Exceptions.Lectura.LeerIntException;
 
 import java.util.Scanner;
 
@@ -11,6 +12,9 @@ public class ConsolaNormal implements Consola{
      */
     @Override
     public void imprimir(String mensaje) {
+        System.out.println(mensaje);
+    }
+    public void imprimirError(String mensaje) {
         System.out.println(mensaje);
     }
 
@@ -43,7 +47,7 @@ public class ConsolaNormal implements Consola{
                 Scanner entrada = new Scanner(System.in);
                 return entrada.nextInt();
             } catch (Exception e) {
-                throw new LeerException("Solo se aceptan números enteros.");
+                throw new LeerIntException();
             }
         }catch(LeerException le){
             return leerInt(descripcion);

@@ -8,7 +8,7 @@ public interface Comando {
     void imprimirTablero();
     void jugador();
     boolean tirarDados(boolean haTirado, String[] entradaPartida) throws LeerException;
-    void comprarComando(String[] entradaPartida, boolean haTirado);
+    void comprarComando(String[] entradaPartida, boolean haTirado) throws LeerIncorrectoException;
     void edificar(String[] entradaPartida);
     void venderEdificio(String[] entradaPartida);
     void hipotecar(String[] entradaPartida) throws LeerIncorrectoException;
