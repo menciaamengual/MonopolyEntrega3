@@ -986,6 +986,17 @@ public class Juego implements Comando{
                 }
                 venderEdificio(entradaPartida);
                 break;
+            case "trato": //crear propuesta
+                proponerTrato(jugadorActual,tablero);
+                break;
+            case "tratos": //ver todas las propuestas que te han hecho
+                jugadorActual.imprimirTratosRecibidos();
+                break;
+            case "aceptar": //aceptar una propuesta
+                if (entradaPartida[1].equals("trato")) {
+                    imprimirTablero();
+                }
+
             default:
                 consolaNormal.imprimir("No se reconoce la acción... Introduce 'ayuda' para ver tus opciones.");
         }
@@ -1464,6 +1475,9 @@ public class Juego implements Comando{
                 jugadorActual.addTratoPropuesto(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), (Propiedad) tablero.getCasilla(nombrePropExenta), turnosExento));
                 getJugador(nombreReceptor).addTratoRecibido(new Trato(jugadorActual, getJugador(nombreReceptor), (Propiedad) tablero.getCasilla(nombrePropOfrecida), (Propiedad) tablero.getCasilla(nombrePropSolicitada), (Propiedad) tablero.getCasilla(nombrePropExenta), turnosExento));
         }
+    }
+    public void listarTratosRecibidos(){
+
     }
 }
 

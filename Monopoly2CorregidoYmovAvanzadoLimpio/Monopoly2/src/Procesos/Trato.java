@@ -20,6 +20,7 @@ public class Trato {
     private int turnosExento; // Turnos que dura la exención del pago del alquiler en propExenta
     private int tipoTrato; // Puede que sea omisible, pero creo que puede facilitar mucho la impresión de un trato.
 
+
     // CONSTRUCTORES
 
         /* Identificamos 6 tipos de tratos:
@@ -157,9 +158,7 @@ public class Trato {
         return turnosExento;
     }
 
-
-
-
+    public int getTipoTrato() {return tipoTrato;}
     // SETTERS
 
     public void setOfertante(Jugador ofertante) {

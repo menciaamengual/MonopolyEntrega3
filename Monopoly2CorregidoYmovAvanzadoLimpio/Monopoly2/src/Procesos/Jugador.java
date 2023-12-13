@@ -30,6 +30,7 @@ public class Jugador {
     private int fortuna; //falta edificios
 
 
+
     //CONSTRUCTORES
     public Jugador(int dinero, String nombre, Avatar avatar) {
         this.dinero = dinero; //inicial: un tercio del valor total de los solares
@@ -307,7 +308,23 @@ public class Jugador {
         }
         tratosRecibidos.add(trato);
     }
+    public void imprimirTratosRecibidos(){
+        if(!tratosRecibidos.isEmpty()){
+            for (int i=0; i<tratosPropuestos.size(); i++){
+                Juego.getConsolaNormal().imprimir("Trato "+(i+1)+":" );
+                tratosRecibidos.get(i).imprimirTratoParaProponer();
+                Juego.getConsolaNormal().imprimir("\n");
+        }
+        }
+        else
+            Juego.getConsolaNormal().imprimir("No tienes tratos pendientes");
+    }
 
+    public void aceptarTrato(int numTrato){
+        switch (tratosRecibidos.get(numTrato-1).getTipoTrato()){
+
+        }
+    }
 
     public boolean equals(Jugador obj) {
         return nombre.equals(obj.getNombre());
