@@ -1,7 +1,7 @@
 package Procesos;
 
 import java.util.Random;
-public class Dado {
+public final class Dado {
     private int Dado1;
     private int Dado2;
     private int c; //Registra el número de tiradas iguales seguidas

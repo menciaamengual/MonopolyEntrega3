@@ -6,7 +6,7 @@ import Juego.Exceptions.Lectura.LeerIntException;
 
 import java.util.Scanner;
 
-public class ConsolaNormal implements Consola{
+public final class ConsolaNormal implements Consola{
 
     @Override
     public void imprimir(String mensaje) {

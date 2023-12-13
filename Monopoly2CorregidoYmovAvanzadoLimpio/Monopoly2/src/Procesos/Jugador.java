@@ -7,13 +7,12 @@ import Procesos.Avatares.*;
 import java.util.*;
 
 
-public class Jugador {
+public final class Jugador {
     //ATRIBUTOS
     private Avatar avatar; // Avatar del jugador. Almacena to' lo relativo a posiciones, movimiento y cárcel
-    private String nombre;
+    private final String nombre;
     private int dinero;
     private ArrayList<Propiedad> propiedades;
-    private ArrayList<Carta> cartasSuerte;
     private int vueltas;
     private boolean bancarrota;
     private  boolean puedeComprarPropiedades; // Solo se hacen comprobaciones con él en el caso de que movAvanzado esté activado y sea tipo coche. Es como un segundo auxMovAvanzado
@@ -34,7 +33,6 @@ public class Jugador {
         this.nombre = nombre;
         this.avatar = avatar; //Generacion del avatar random
         propiedades = new ArrayList<>(20);
-        cartasSuerte = null;
         bancarrota = false;
         dineroInvertido = 0;
         pagoTasasEImpuestos = 0;
@@ -51,7 +49,6 @@ public class Jugador {
         dinero = 100000000;
         fortuna= 100000000;
         nombre = "Banca";
-        cartasSuerte = null;
         propiedades = new ArrayList<>(40); //Se le meten cuando se crean las propiedades
     }
 
@@ -139,8 +136,8 @@ public class Jugador {
                 propiedades.clear();
             }
             else
-                for (Casilla ite: propiedades){
-                    ((Solar)ite).setPropietario(acreedor);
+                for (int i = 0; i<propiedades.size();i++){
+                    (propiedades.get(0)).setPropietario(acreedor);
                 }
         pagar(dinero,acreedor);
         Juego.getConsolaNormal().imprimir("Ahora estás en banca rota");

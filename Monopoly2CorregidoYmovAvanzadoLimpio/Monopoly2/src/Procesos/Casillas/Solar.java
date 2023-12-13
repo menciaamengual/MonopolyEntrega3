@@ -230,7 +230,7 @@ public final class Solar extends Propiedad {
     @Override
     public void accionCasilla(Jugador jugador) throws AlquilerDineroInsufException {
         if (!getPropietario().equals(jugador) && !getPropietario().isBanca() && !getHipotecado()) {
-            if (!jugador.pagar(calcularAlquiler(), getPropietario())) throw new AlquilerDineroInsufException();
+            if (!jugador.pagar(calcularAlquiler(), getPropietario())) throw new AlquilerDineroInsufException(getPropietario(),calcularAlquiler());
             setRentabilidad(getRentabilidad() + calcularAlquiler());
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());

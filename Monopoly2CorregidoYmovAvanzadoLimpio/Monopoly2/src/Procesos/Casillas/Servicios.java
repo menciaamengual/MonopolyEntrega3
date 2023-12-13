@@ -21,7 +21,7 @@ public class Servicios extends Propiedad {
 
     public void accionCasilla(Jugador jugador, Dado dado) throws AlquilerDineroInsufException {
         if (!getPropietario().equals(jugador) && !getPropietario().isBanca() && !getHipotecado()) {
-            if(!jugador.pagar(calcularAlquiler(dado), getPropietario())) throw new AlquilerDineroInsufException();
+            if(!jugador.pagar(calcularAlquiler(dado), getPropietario())) throw new AlquilerDineroInsufException(getPropietario(),calcularAlquiler(dado));
             setRentabilidad(getRentabilidad() + calcularAlquiler(dado)); //edificios??
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler(dado));
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler(dado));

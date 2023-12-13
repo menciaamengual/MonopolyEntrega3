@@ -3,8 +3,8 @@ package Juego.Exceptions;
 import Procesos.Jugador;
 
 public class AlquilerDineroInsufException extends JuegoException {
-    private Jugador cobrador;
-    private int dineroPendiente;
+    private final Jugador cobrador;
+    private final int dineroPendiente;
     public AlquilerDineroInsufException(Jugador j, int valor) {
         super("DineroInsuf");
         cobrador = j;

@@ -5,7 +5,7 @@ import Procesos.Jugador;
 import java.util.ArrayList;
 
 public abstract class Casilla{
-    private int posicion; //0-43
+    private final int posicion; //0-43
     private String nombre;
     private int visitas;
     private ArrayList<Jugador> ocupantes;
@@ -95,7 +95,7 @@ public abstract class Casilla{
 
     public String descripcion(){
         return "{\nnombre: " + getNombre() +"\n"+
-                "tipo: "+ getClass() +" \n" +
+                "tipo: "+ getClass().getName() +" \n" +
                 "}\n";
     }
 

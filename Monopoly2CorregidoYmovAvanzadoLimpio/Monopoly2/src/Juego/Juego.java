@@ -11,7 +11,7 @@ import Procesos.*;
 import Procesos.Casillas.*;
 import Procesos.Avatares.*;
 
-public class Juego implements Comando{
+public final class Juego implements Comando{
     private static ConsolaNormal consolaNormal;
     //ATRIBUTOS
     private static Tablero tablero;
@@ -447,7 +447,7 @@ public class Juego implements Comando{
     }
     public void jugador(){
         consolaNormal.imprimir("Nombre: " + jugadorActual.getNombre());
-        consolaNormal.imprimir("Avatar: " + jugadorActual.getAvatar());
+        consolaNormal.imprimir("Avatar: " + jugadorActual.getAvatar().getClass().getSimpleName());
         consolaNormal.imprimir("Dinero: " + jugadorActual.getDinero());
         consolaNormal.imprimir("Posición: " + jugadorActual.getAvatar().getPosicion());
     }

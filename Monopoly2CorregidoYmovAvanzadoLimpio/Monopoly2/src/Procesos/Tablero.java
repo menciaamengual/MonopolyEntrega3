@@ -7,7 +7,7 @@ import java.util.Map;
 import Juego.Juego;
 import Procesos.Casillas.*;
 
-public class Tablero {
+public final class Tablero {
     static int ccasa = 0;
     static int chotel = 0;
     static int cpiscina = 0;

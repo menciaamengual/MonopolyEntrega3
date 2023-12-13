@@ -64,8 +64,7 @@ public abstract class Avatar { // Avatar es una clase abstracta porque no existe
     }
 
     /**
-     * @param casillas
-     * @return
+     * @return Casilla en la posicion del avatar
      */
     public Casilla getCasilla(ArrayList<Casilla> casillas) {
         return casillas.get(posicion);
