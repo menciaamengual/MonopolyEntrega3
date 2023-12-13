@@ -1,5 +1,6 @@
 package Procesos.Casillas;
 
+import Juego.Exceptions.AlquilerDineroInsufException;
 import Juego.Juego;
 import Procesos.Jugador;
 
@@ -120,6 +121,9 @@ public abstract class Propiedad extends Casilla {
         return rentabilidad;
     }
 
+    public String descripcionDetallada() {
+        return "Descripción genérica";
+    }
     public String descripcion(){
         return "{\nnombre: " + getNombre() +"\n"+
                 "tipo: "+ getClass() +" \n" +
@@ -127,7 +131,7 @@ public abstract class Propiedad extends Casilla {
                 "Propietario: " + getPropietario().getNombre() +"\n" +
                 "}\n";
     }
-    public void accionCasilla(Jugador jugador){
+    public void accionCasilla(Jugador jugador) throws AlquilerDineroInsufException {
         if (!propietario.equals(jugador) && !propietario.isBanca() && !hipotecado) {
             jugador.pagar(calcularAlquiler(), propietario);
             setRentabilidad(rentabilidad + calcularAlquiler()); //edificios??

@@ -1,5 +1,6 @@
 package Procesos.Avatares;
 
+import Juego.Exceptions.Lectura.LeerException;
 import Juego.Juego;
 import Procesos.Jugador;
 import Procesos.Tablero;
@@ -18,7 +19,7 @@ public final class Pelota extends Avatar{
 
     // OTROS MÉTODOS
 
-    public void avanzarCasillasAvanzado(Juego juego, Tablero tablero, int avance, Jugador jugadorActual, Jugador banca){
+    public void avanzarCasillasAvanzado(Juego juego, Tablero tablero, int avance, Jugador jugadorActual, Jugador banca) throws LeerException {
         setAuxMovAvanzado(1); // Indica que el turno aún está en curso
         if (avance > 4) {
             avanzarCasillasSimple(juego, tablero, 4, jugadorActual, banca);
@@ -36,7 +37,9 @@ public final class Pelota extends Avatar{
                 if ((jugadorActual.getAvatar().getPosicion() - aux) % 2 != 0) { // Si es impar, se para en la casilla, se ejecuta la accion correspondiente y el jugador puede interactuar
                     Juego.getConsolaNormal().imprimir("¡Momento de pararse! Introduce \"acabar parada\" para avanzar a la siguiente casilla");
                     tablero.imprimirTablero();
+
                     juego.accionCasilla();
+
                     if (jugadorActual.getAvatar().inCarcel()) {
                         break;
                     }

@@ -1,5 +1,9 @@
 package Juego;
 
+
+import Juego.Exceptions.Lectura.LeerException;
+import Juego.Exceptions.Lectura.LeerIntException;
+
 import java.util.Scanner;
 
 public class ConsolaNormal implements Consola{
@@ -15,17 +19,28 @@ public class ConsolaNormal implements Consola{
         Scanner entrada = new Scanner(System.in);
         return entrada.nextLine();
     }
+    public void imprimirError(String mensaje) {
+        System.out.println(mensaje);
+    }
 
     @Override
-    public String[] leerFragmentado(String descripcion) {
-        System.out.println(descripcion);
+    public String[] leerConsolaFragmentado(String descripcion) {
+        System.out.print(descripcion);
         Scanner entrada = new Scanner(System.in);
         String entradaString = entrada.nextLine();
         return entradaString.split(" ");
     }
     public int leerInt (String descripcion){
-        System.out.println(descripcion);
-        Scanner entrada = new Scanner(System.in);
-        return entrada.nextInt();
+        try {
+            try {
+                System.out.println(descripcion);
+                Scanner entrada = new Scanner(System.in);
+                return entrada.nextInt();
+            } catch (Exception e) {
+                throw new LeerIntException();
+            }
+        }catch(LeerException le){
+            return leerInt(descripcion);
+        }
     }
 }

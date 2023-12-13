@@ -27,9 +27,6 @@ public class Tablero {
             grupos.add(new Grupo(i));
         }
     }
-
-
-
     private void inicializarCasillas(int pBase, int pSalida, Jugador banca) {
         casillasMap = new LinkedHashMap<>();
         casillasMap.put("Salida", 0);

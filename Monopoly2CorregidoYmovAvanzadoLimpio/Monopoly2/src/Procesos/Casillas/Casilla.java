@@ -98,6 +98,10 @@ public abstract class Casilla{
                 "tipo: "+ getClass() +" \n" +
                 "}\n";
     }
+
+    public int getPosicion() {
+        return posicion;
+    }
 }
 //
 //public class Casilla {

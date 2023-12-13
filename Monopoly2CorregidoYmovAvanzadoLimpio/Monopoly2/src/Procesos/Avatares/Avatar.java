@@ -1,5 +1,6 @@
 package Procesos.Avatares;
 
+import Juego.Exceptions.Lectura.LeerException;
 import Procesos.Jugador;
 import Procesos.Casillas.*;
 import Procesos.Avatares.*;
@@ -8,7 +9,7 @@ import Juego.Juego;
 import Procesos.Tablero;
 
 
-public abstract class Avatar {
+public abstract class Avatar { // Avatar es una clase abstracta porque no existe ningún objeto que pertenezca a la clase Avatar pero no pertenezca a ninguna de las subclases.
 
     // ATRIBUTOS
 

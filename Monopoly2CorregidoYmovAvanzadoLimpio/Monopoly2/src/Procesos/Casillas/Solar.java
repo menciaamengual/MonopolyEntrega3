@@ -1,8 +1,10 @@
 package Procesos.Casillas;
 
+import Juego.Exceptions.Comprar.ComprarExceptionDineroInsuficiente;
 import Procesos.Jugador;
 import Procesos.Tablero;
 import Juego.Juego;
+import Juego.Exceptions.*;
 
 import java.util.ArrayList;
 
@@ -226,9 +228,9 @@ public final class Solar extends Propiedad {
     //Acción
 
     @Override
-    public void accionCasilla(Jugador jugador) {
+    public void accionCasilla(Jugador jugador) throws AlquilerDineroInsufException {
         if (!getPropietario().equals(jugador) && !getPropietario().isBanca() && !getHipotecado()) {
-            jugador.pagar(calcularAlquiler(), getPropietario());
+            if (!jugador.pagar(calcularAlquiler(), getPropietario())) throw new AlquilerDineroInsufException();
             setRentabilidad(getRentabilidad() + calcularAlquiler());
             jugador.setPagoDeAlquileres(jugador.getPagoDeAlquileres() + calcularAlquiler());
             getPropietario().setCobroDeAlquileres(getPropietario().getCobroDeAlquileres() + calcularAlquiler());

@@ -261,7 +261,7 @@ public class Jugador {
 
     public int getNTrans() {
         int i = 0;
-        for (Casilla casilla : propiedades) {
+        for (Propiedad casilla : propiedades) {
             if (casilla instanceof Transporte) i++;
         }
         return i;
