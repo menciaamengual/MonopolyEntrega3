@@ -7,6 +7,6 @@ public final class Pista extends Edificio {
     public Pista(int precioC){
         super();
         setPrecio((int)(precioC*0.6));
-        setIdentificador("Casa "+ Tablero.getCdeporte());
+        setIdentificador("Pista "+ Tablero.getCdeporte());
     }
 }
