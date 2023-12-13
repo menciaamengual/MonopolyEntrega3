@@ -342,7 +342,7 @@ public class Juego implements Comando{
         } else { // SI NO ESTÁ EN LA CÁRCEL...
 
             // 1. NO LE DEJAMOS TIRAR SI TIENE EL MOTOR ROTO
-            if (jugadorActual.getAvatar().getTipoMov() == 1 && jugadorActual.getAvatar().getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
+            if (jugadorActual.getAvatar() instanceof Coche && jugadorActual.getAvatar().getAuxMovAvanzado() < 0) { // importante no poner movAuxActivado para evitar exploit de que el usuario reinicie los turnos sin poder moverse mediante la introducción de cambiar movimiento
                 consolaNormal.imprimir("Tu motor sigue roto. ¡No puedes moverte!");
                 return true;
             }
@@ -368,13 +368,13 @@ public class Juego implements Comando{
             // REALIZAMOS LA ACCIÓN CORRESPONDIENTE SI SE SACA DOBLES:
 
             if (dado.areEqual()) {
-                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // Si es coche, solo importan los dobles en la última tirada.
+                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Coche) { // Si es coche, solo importan los dobles en la última tirada.
                     if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0)
                         consolaNormal.imprimir("Has sacado dobles! Puedes volver a tirar.");
                 } else { // De ser de otro modo, siempre importan los dobles, así que imprimimos el mensaje correspondiente.
                     consolaNormal.imprimir("Has sacado dobles! Puedes volver a tirar.");
                 }
-                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0 && jugadorActual.getAvatar().getAuxMovAvanzado() == 999) {
+                if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Pelota && jugadorActual.getAvatar().getAuxMovAvanzado() == 999) {
                     consolaNormal.imprimir("Como el movimiento avanzado está activado, la tirada extra de dados será cuando pases por todas las paradas.");
                 }
             }
@@ -385,21 +385,21 @@ public class Juego implements Comando{
             if (dado.getC() == 3) {
                 consolaNormal.imprimir("Has sacado dados dobles 3 veces seguidas. ¡Vas a la cárcel! ");
                 jugadorActual.getAvatar().enviarCarcel(tablero.getCasillas());
-                if (!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1))
+                if (!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Coche))
                     tablero.imprimirTablero();
                 return true;
             }
 
             // Si el Movimiento Avanzado está activado...
             if (jugadorActual.getAvatar().getMovAvanzadoActivado()) {
-                if (jugadorActual.getAvatar().getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+                if (jugadorActual.getAvatar() instanceof Pelota) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
                     if(jugadorActual.getAvatar().getAuxMovAvanzado()==999){ // Si es el primer turno
                         jugadorActual.getAvatar().avanzarCasillasAvanzado(this, tablero, dado.getSuma(), jugadorActual, banca);
                     }else{ // Si no es el primer turno y puede tirar, significa que ha sacado dobles. No obstante, tira en movimiento simple.
                         jugadorActual.getAvatar().avanzarCasillasSimple(this, tablero, dado.getSuma(), jugadorActual, banca);
                     }
                 }
-                if (jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+                if (jugadorActual.getAvatar() instanceof Coche) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
                     if (jugadorActual.getAvatar().getAuxMovAvanzado() == 999) { // Si es el primer turno
                         jugadorActual.getAvatar().avanzarCasillasAvanzado(this, tablero, dado.getSuma(), jugadorActual, banca);
                     } else { // Si no es el primer turno...
@@ -446,7 +446,7 @@ public class Juego implements Comando{
             consolaNormal.imprimir("Aun no has tirado los dados. Tiralos para poder comprar propiedades");
         }
         else if (entradaPartida.length > 1 && entradaPartida[1].equals("propiedad") || entradaPartida[1].equals(jugadorActual.getAvatar().getCasilla(tablero.getCasillas()).getNombre())) {
-            if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // Si es coche
+            if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Coche) { // Si es coche
                 if (((Coche) jugadorActual.getAvatar()).getPuedeComprarPropiedades()) {
                     if (!jugadorActual.getAvatar().getCasilla(tablero.getCasillas()).isComprable()) {
                         consolaNormal.imprimir("No puedes comprar esta propiedad");
@@ -649,11 +649,11 @@ public class Juego implements Comando{
             consolaNormal.imprimir("Tienes que tirar antes de terminar el turno");
         }
         // Sin embargo, existe un caso en el que el jugador no puede tirar, pero tampoco puede acabar el turno. Lo tratamos:
-        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 0 && jugadorActual.getAvatar().getAuxMovAvanzado() == 1) {
+        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Pelota && jugadorActual.getAvatar().getAuxMovAvanzado() == 1) {
             // (Si es tipo Pelota, el movimiento avanzado está activado y aún le quedan paradas por recorrer)
             consolaNormal.imprimir("¡Aún te quedan paradas por recorrer!");
         }
-        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+        else if (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Coche) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
             if (jugadorActual.getAvatar().getAuxMovAvanzado() < 0) { // SI EL JUGADOR QUE ACABA EL TURNO ES UN COCHE CON MOTOR ROTO
                 jugadorActual.getAvatar().setAuxMovAvanzado(jugadorActual.getAvatar().getAuxMovAvanzado() + 1);
                 if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0) {
@@ -663,7 +663,7 @@ public class Juego implements Comando{
                     Juego.getConsolaNormal().imprimir("\nTurnos restantes para poder moverte: \n" + -jugadorActual.getAvatar().getAuxMovAvanzado());
                     ((Coche) jugadorActual.getAvatar()).setPuedeComprarPropiedades(true);
                     // jugadorActual.setAuxMovAvanzado(999);
-                    if (jugadorActual.getAvatar().getTipoMov() == 1) {
+                    if (jugadorActual.getAvatar() instanceof Coche) {
                         Coche cocheActual = (Coche) jugadorActual.getAvatar();
                         cocheActual.setPuedeComprarPropiedades(true);
                     }
@@ -676,16 +676,13 @@ public class Juego implements Comando{
         else if (pagando && !jugadorActual.getBancarrota()) {
             consolaNormal.imprimir("Debes saldar tu deuda antes de acabar el turno, o declararte en bancarrota");
         } else {
-            if (!(jugadorActual.getAvatar().getTipoMov() == 1 && jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getAuxMovAvanzado() < 0)) {
+            if (!(jugadorActual.getAvatar() instanceof Coche && jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getAuxMovAvanzado() < 0)) {
                 jugadorActual.getAvatar().setAuxMovAvanzado(999);
             }
-            if (jugadorActual.getAvatar().getTipoMov() == 1) {
+            if (jugadorActual.getAvatar() instanceof Coche) {
                 Coche cocheActual = (Coche) jugadorActual.getAvatar();
                 cocheActual.setPuedeComprarPropiedades(true);
             }
-                        /* if(jugadorActual.getMovAvanzadoActivado() && jugadorActual.getTipoMov()==0){
-                            hayBug=true;
-                        } */
             nextJugador();
             consolaNormal.imprimir("Turno de: " + jugadorActual.getNombre());
             c = true;
@@ -850,15 +847,15 @@ public class Juego implements Comando{
                         return true;
                 }
                 if (entradaPartida.length > 1 && entradaPartida[1].equals("parada")) {
-                    if(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0 && jugadorActual.getAvatar().getAuxMovAvanzado()==0){
+                    if(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Pelota && jugadorActual.getAvatar().getAuxMovAvanzado()==0){
                         System.out.println("Ya has pasado por todas tus paradas.");
                         break;
                     }
-                    else if(!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==1)){
+                    else if(!jugadorActual.getAvatar().getMovAvanzadoActivado() || (jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Coche)){
                         System.out.println("¿Paradas? Bro think he pelota con movAvanzadoActivado");
                         break;
                     }
-                    else if (!(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar().getTipoMov()==0)) tablero.imprimirTablero();
+                    else if (!(jugadorActual.getAvatar().getMovAvanzadoActivado() && jugadorActual.getAvatar() instanceof Pelota)) tablero.imprimirTablero();
                     return haTirado;
                 }
                 break;
@@ -1111,7 +1108,7 @@ public class Juego implements Comando{
 
     private boolean puedeTirarOtraVez(boolean haTirado) {
         if (jugadorActual.getAvatar().getMovAvanzadoActivado()) { // SI ESTÁ EL MOVIMIENTO AVANZADO ACTIVADO, DISTINGUIMOS ENTRE "PELOTA" Y "COCHE"
-            if (jugadorActual.getAvatar().getTipoMov() == 0) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
+            if (jugadorActual.getAvatar() instanceof Pelota) { // MOVIMIENTO AVANZADO "PELOTA" ------------------------------------------------------------------------------
                 if (jugadorActual.getAvatar().getAuxMovAvanzado() == 1) { // Si le quedan paradas sin recorrer, no puede tirar
                     return false;
                 }
@@ -1120,12 +1117,12 @@ public class Juego implements Comando{
                 }
             }
 
-            if (jugadorActual.getAvatar().getTipoMov() == 1) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
+            if (jugadorActual.getAvatar() instanceof Coche) { // MOVIMIENTO AVANZADO "COCHE" ------------------------------------------------------------------------------
                 if (jugadorActual.getAvatar().getAuxMovAvanzado() == 0 && !dado.areEqual()) { // Si se le acabaron las tiradas extra y no sacó dobles en la anterior, no puede tirar
                     return false;
                 }
                 // Motor roto
-                return jugadorActual.getAvatar().getTipoMov() != 1 || jugadorActual.getAvatar().getAuxMovAvanzado() >= 0;
+                return (jugadorActual.getAvatar() instanceof Pelota || jugadorActual.getAvatar().getAuxMovAvanzado() >= 0);
             }
         } else { // SI NO ESTÁ ACTIVADO EL MOV AVANZADO...
             return !haTirado || dado.areEqual();
