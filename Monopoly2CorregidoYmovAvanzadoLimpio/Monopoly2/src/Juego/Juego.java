@@ -1,6 +1,5 @@
 package Juego;
 
-import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 
 import Juego.Exceptions.*;
@@ -551,7 +550,7 @@ public class Juego implements Comando{
         return false;
     }
 
-    public void comprarComando(String[] entradaPartida, boolean haTirado) throws LeerIncorrectoException { //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
+    public void comprarComando(String[] entradaPartida, boolean haTirado) { //todo comprobar si funciona; PQ FUERON MAZO DE CAMBIOS
         try{
             if (jugadorActual.getBancarrota())
                 throw new ComandoBancarrotaException();
@@ -583,8 +582,8 @@ public class Juego implements Comando{
                 if (tablero.getCasilla(entradaPartida[1]) == null) throw new CasillaInexistenteException();
                 else consolaNormal.imprimir("No estás en esta casilla");
             }
-        }catch(ArrayIndexOutOfBoundsException | CasillaInexistenteException a){
-            throw new LeerIncorrectoException();
+        }catch(ArrayIndexOutOfBoundsException | CasillaInexistenteException ignored){
+
         }
     }
     public void edificar(String[] entradaPartida){
