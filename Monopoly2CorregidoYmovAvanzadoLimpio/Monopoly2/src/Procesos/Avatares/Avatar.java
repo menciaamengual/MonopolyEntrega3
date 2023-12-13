@@ -13,7 +13,7 @@ public abstract class Avatar { // Avatar es una clase abstracta porque no existe
 
     // ATRIBUTOS
 
-    private char identificador; // La letra que identifica al jugador
+    private final char identificador; // La letra que identifica al jugador
     private int posicion;
     private int turnosCarcel; //informa de la situación del jugador respecto de la cárcel:
     // 0: No está en la cárcel / está en la casilla de cárcel pero si tira dados mueve
@@ -21,7 +21,6 @@ public abstract class Avatar { // Avatar es una clase abstracta porque no existe
     // 2: Está en la cárcel, y tiene UNA oportunidad para tirar dados, sacar dobles y salir
     // 3: Está en la cárcel, y tiene DOS oportunidades para tirar dados, sacar dobles y salir
     // 4: Está en la cárcel, y tiene TRES oportunidades para tirar dados, sacar dobles y salir
-    // private Jugador jugador; // El jugador que lleva el avatar
     private boolean movAvanzadoActivado;
     private int auxMovAvanzado;
     private Jugador jugador; // El jugador al que pertenece el avatar
@@ -137,8 +136,7 @@ public abstract class Avatar { // Avatar es una clase abstracta porque no existe
             }
         }
     }
-    public abstract void avanzarCasillasAvanzado(Juego juego, Tablero tablero, int avance, Jugador jugadorActual, Jugador banca);
-    public abstract int getTipoMov();
-    // Podríamos haber optado por poner if(avatar instanceof Coche), por ejemplo, pero nos quedamos con getTipoMov porque cambiar la implementación anterior era más sencillo.
+    public abstract void avanzarCasillasAvanzado(Juego juego, Tablero tablero, int avance, Jugador jugadorActual, Jugador banca) throws LeerException;
+
 }
 

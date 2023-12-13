@@ -1314,7 +1314,7 @@ public final class Juego implements Comando{
                     return false;
                 }
                 // Motor roto
-                return jugadorActual.getAvatar().getTipoMov() != 1 || jugadorActual.getAvatar().getAuxMovAvanzado() >= 0;
+                return jugadorActual.getAvatar() instanceof Pelota || jugadorActual.getAvatar().getAuxMovAvanzado() >= 0;
             }
         } else { // SI NO ESTÁ ACTIVADO EL MOV AVANZADO...
             return !haTirado || dado.areEqual();

@@ -43,6 +43,11 @@ public final class Jugador {
         vecesEnLaCarcel = 0;
         vecesDados=0;
         fortuna=0;
+        casillasExentas = new int[40];
+        for (int i = 0; i < casillasExentas.length; i++) {
+            casillasExentas[i] = 0;
+        }
+
     }
 
     public Jugador() {
@@ -56,6 +61,10 @@ public final class Jugador {
     public String getNombre() {
         return nombre;
     }
+
+    public int getCasillaExenta(int posicion) {
+        return (casillasExentas[posicion]);
+        }
 
     public ArrayList<Propiedad> getPropiedades() {
         return propiedades;
@@ -93,6 +102,15 @@ public final class Jugador {
 
     public int getFortuna() {return fortuna;}
 
+    public ArrayList<Trato> getTratosPropuestos() {
+        return tratosPropuestos;
+    }
+
+    // Getter para obtener la lista de tratos recibidos
+    public ArrayList<Trato> getTratosRecibidos() {
+        return tratosRecibidos;
+    }
+
 
 
 
@@ -108,6 +126,10 @@ public final class Jugador {
     public void addDinero(int dinero) {
         fortuna += dinero;
         this.dinero += dinero;
+    }
+
+    public void setCasillaExenta(int posicion, int turnos) {
+        casillasExentas[posicion] = turnos;
     }
 
     public void setAvatar(Avatar avatar){
