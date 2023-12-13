@@ -4,7 +4,7 @@ import Juego.Juego;
 import Procesos.Jugador;
 import Procesos.Tablero;
 
-public final class Coche extends Avatar {
+public final class Coche extends Avatar {  // Clase final porque no tiene subclases
 
     // ATRIBUTOS
     private boolean puedeComprarPropiedades;

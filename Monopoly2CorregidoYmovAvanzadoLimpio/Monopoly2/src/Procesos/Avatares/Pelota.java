@@ -4,7 +4,7 @@ import Juego.Juego;
 import Procesos.Jugador;
 import Procesos.Tablero;
 
-public final class Pelota extends Avatar{
+public final class Pelota extends Avatar{ // Clase final porque no tiene subclases
 
     // indicadorParadas == 1: el jugador aún no ha llegado a la casilla final
     // indicadorParadas == 0: el jugador ya está en la casilla final

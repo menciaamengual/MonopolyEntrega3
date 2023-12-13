@@ -7,7 +7,7 @@ import Juego.Juego;
 import Procesos.Tablero;
 
 
-public abstract class Avatar {
+public abstract class Avatar { // Avatar es una clase abstracta porque no existe ningún objeto que pertenezca a la clase Avatar pero no pertenezca a ninguna de las subclases.
 
     // ATRIBUTOS
 
@@ -136,6 +136,6 @@ public abstract class Avatar {
         }
     }
     public abstract void avanzarCasillasAvanzado(Juego juego, Tablero tablero, int avance, Jugador jugadorActual, Jugador banca);
-    // Podríamos haber optado por poner if(avatar instanceof Coche), por ejemplo, pero nos quedamos con getTipoMov porque cambiar la implementación anterior era más sencillo.
+    // Método abstracto con funcionalidad común para las dos subclases, pero con comportamiento claramente diferenciado. Empleamos "abstract" porque el comportamiento específico para cada clase se definirá en cada subclase
 }
 
