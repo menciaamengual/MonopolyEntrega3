@@ -26,6 +26,10 @@ public final class Jugador {
     private int vecesDados;
     private int fortuna; //falta edificios
 
+    private ArrayList<Trato> tratosPropuestos;
+    private ArrayList<Trato> tratosRecibidos;
+    private int[] casillasExentas; // Array de tamaño 40 que almacenará los turnos de exención de alquiler, si corresponde, en cada una de las casillas.
+
 
     //CONSTRUCTORES
     public Jugador(int dinero, String nombre, Avatar avatar) {
@@ -293,10 +297,139 @@ public final class Jugador {
         }
         return i;
     }
+    public void addTratoPropuesto(Trato trato) {
+        if (tratosPropuestos == null) {
+            tratosPropuestos = new ArrayList<>();
+        }
+        tratosPropuestos.add(trato);
+    }
 
+    public void addTratoRecibido(Trato trato) {
+        if (tratosRecibidos == null) {
+            tratosRecibidos = new ArrayList<>();
+        }
+        tratosRecibidos.add(trato);
+    }
+    public void imprimirTratosRecibidos(){
+        if(tratosRecibidos!=null){ //HODer
+            for (int i=0; i<tratosRecibidos.size(); i++){
+                Juego.getConsolaNormal().imprimir("Trato "+ (i+1) +":" );
+                tratosRecibidos.get(i).imprimirTratoParaProponer();
+            }
+        }
+        else
+            Juego.getConsolaNormal().imprimir("No tienes tratos pendientes");
+    }
+    public void imprimirTratosPropuestos(){
+        if(tratosPropuestos!=null){
+            for (int i=0; i<tratosPropuestos.size(); i++){
+                Juego.getConsolaNormal().imprimir("Trato "+(i+1)+":" );
+                tratosPropuestos.get(i).imprimirTratoParaProponer();
+            }
+        }
+        else
+            Juego.getConsolaNormal().imprimir("No tienes tratos propuestos");
+    }
 
     public boolean equals(Jugador obj) {
         return nombre.equals(obj.getNombre());
+    }
+
+    public void aceptarTrato(int numTrato){
+        Trato trato=tratosRecibidos.get(numTrato-1);
+        switch (trato.getTipoTrato()){
+            case 0:
+                if(trato.getOfertante().getPropiedades().contains(trato.getPropOfrecida()) && trato.getReceptor().getPropiedades().contains(trato.getPropSolicitada())) {
+                    trato.getOfertante().removePropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().addPropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().removePropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().addPropiedad(trato.getPropSolicitada());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+
+            case 1:
+                if(trato.getOfertante().getPropiedades().contains(trato.getPropOfrecida()) && trato.getReceptor().getDinero()>= trato.getDineroSolicitado()) {
+                    trato.getOfertante().removePropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().addPropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().pagar(trato.getDineroSolicitado(), trato.getOfertante());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+
+            case 2:
+                if(trato.getReceptor().getPropiedades().contains(trato.getPropSolicitada()) && trato.getOfertante().getDinero()>= trato.getDineroOfrecido()) {
+                    trato.getReceptor().removePropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().addPropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().pagar(trato.getDineroOfrecido(), trato.getReceptor());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+
+            case 3:
+                if(trato.getOfertante().getPropiedades().contains(trato.getPropOfrecida()) && trato.getReceptor().getPropiedades().contains(trato.getPropSolicitada()) && trato.getReceptor().getDinero()>=trato.getDineroSolicitado()) {
+                    trato.getOfertante().removePropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().addPropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().removePropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().addPropiedad(trato.getPropSolicitada());
+                    trato.getReceptor().pagar(trato.getDineroSolicitado(), trato.getOfertante());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+
+            case 4:
+                if(trato.getOfertante().getPropiedades().contains(trato.getPropOfrecida()) && trato.getReceptor().getPropiedades().contains(trato.getPropSolicitada()) && trato.getOfertante().getDinero()>=trato.getDineroOfrecido()) {
+                    trato.getOfertante().removePropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().addPropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().removePropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().addPropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().pagar(trato.getDineroOfrecido(), trato.getReceptor());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+
+            case 5:
+                if(trato.getOfertante().getPropiedades().contains(trato.getPropOfrecida()) && trato.getReceptor().getPropiedades().contains(trato.getPropSolicitada())) {
+                    trato.getOfertante().removePropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().addPropiedad(trato.getPropOfrecida());
+                    trato.getReceptor().removePropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().addPropiedad(trato.getPropSolicitada());
+                    trato.getOfertante().setCasillaExenta(trato.getPropExenta().getPosicion(), trato.getTurnosExento());
+                    trato.imprimirTratoAceptado();
+                    trato.getOfertante().tratosPropuestos.remove(trato);
+                    trato.getReceptor().tratosRecibidos.remove(trato);
+                }
+                else
+                    Juego.getConsolaNormal().imprimir("El trato no se puede llevar a cabo ya que los jugadores no disponen de los bienes acordados");
+                break;
+        }
+    }
+
+    public void eliminarTrato(int numTrato){
+        Trato trato=tratosPropuestos.get(numTrato-1);
+        trato.getReceptor().tratosRecibidos.remove(trato);
+        trato.getOfertante().tratosPropuestos.remove(trato);
     }
 
     @Override
